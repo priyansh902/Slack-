@@ -1,3 +1,6 @@
 spring:
   application:
     name: Slack
+  profiles:
+    active:
+    - dev

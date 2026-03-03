@@ -8,5 +8,6 @@ import com.PhoenixTechSolutions.product1.model.User;
 
 public interface UserRepositiory extends JpaRepository<User, Long> {
    Optional<User> findByEmail(String email);
+   Optional<User> findByUsername(String username);
     
 }

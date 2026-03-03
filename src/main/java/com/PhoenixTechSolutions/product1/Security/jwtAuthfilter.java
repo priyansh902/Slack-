@@ -16,12 +16,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class jwtAuthfilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
     
     private final Jwtutil jwtUtil;
     private final UserdetailsService userDetailsService;
 
-    public jwtAuthfilter(Jwtutil jwtUtil, UserdetailsService userDetailsService) {
+    public JwtAuthFilter(Jwtutil jwtUtil, UserdetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }

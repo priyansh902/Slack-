@@ -1,24 +1,22 @@
 package com.PhoenixTechSolutions.product1.controllers;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import com.PhoenixTechSolutions.product1.Dtos.LoginRequest;
-import com.PhoenixTechSolutions.product1.Dtos.LoginResponse;
 import com.PhoenixTechSolutions.product1.Dtos.RegisterRequest;
 import com.PhoenixTechSolutions.product1.Security.Jwtutil;
 import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,55 +24,69 @@ public class UserController {
 
     private final AuthenticationManager authenticationManager;
     private final Jwtutil jwtutil;
-    private final UserRepositiory userRepositiory;
+    private final UserRepositiory userRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserController(
             AuthenticationManager authenticationManager,
             Jwtutil jwtutil,
-            UserRepositiory userRepositiory,
+            UserRepositiory userRepository,
             PasswordEncoder passwordEncoder) {
 
         this.authenticationManager = authenticationManager;
         this.jwtutil = jwtutil;
-        this.userRepositiory = userRepositiory;
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email().toLowerCase(),
+                            request.password()
+                    )
+            );
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email().toLowerCase(),
-                        request.password()
-                )
-        );
+            User user = userRepository
+                    .findByEmail(authentication.getName())
+                    .orElseThrow();
 
-        User user = userRepositiory
-                .findByEmail(authentication.getName())
-                .orElseThrow();
+            String token = jwtutil.generateToken(user.getEmail());
 
-        String token = jwtutil.generateToken(user.getUsername());
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("username", user.getUsername());
+            response.put("email", user.getEmail());
+            response.put("name", user.getName());
 
-        return new LoginResponse(
-                token,
-                user.getUsername()
-                    );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Invalid email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(
-            @Valid @RequestBody RegisterRequest request) {
-
-        if (userRepositiory.findByEmail(request.email().toLowerCase()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        
+        // Check if email already exists
+        if (userRepository.findByEmail(request.email().toLowerCase()).isPresent()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Email already exists");
+            return ResponseEntity.badRequest().body(error);
         }
 
-        if (userRepositiory.findByUsername(request.username()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already taken");
+        // Check if username already taken
+        if (userRepository.findByUsername(request.username()).isPresent()) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Username already taken");
+            return ResponseEntity.badRequest().body(error);
         }
 
+        // Create new user
         User user = User.builder()
                 .name(request.name())
                 .username(request.username())
@@ -83,13 +95,32 @@ public class UserController {
                 .role("ROLE_USER")
                 .build();
 
-        userRepositiory.save(user);
+        userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully");
+        Map<String, String> success = new HashMap<>();
+        success.put("message", "User registered successfully");
+        success.put("email", user.getEmail());
+        success.put("username", user.getUsername());
+
+        return ResponseEntity.ok(success);
     }
 
     @GetMapping("/me")
-    public Object me(Authentication authentication) {
-        return authentication.getPrincipal();
+    public ResponseEntity<?> me(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        User user = (User) authentication.getPrincipal();
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());
+        response.put("name", user.getName());
+        response.put("username", user.getUsername());
+        response.put("email", user.getEmail());
+        response.put("role", user.getAuthorities());
+        response.put("createdAt", user.getCreatedAt());
+        
+        return ResponseEntity.ok(response);
     }
 }

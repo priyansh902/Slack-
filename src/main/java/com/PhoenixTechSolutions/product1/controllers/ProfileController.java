@@ -4,7 +4,7 @@ import com.PhoenixTechSolutions.product1.Dtos.ProfileRequest;
 import com.PhoenixTechSolutions.product1.Dtos.ProfileResponse;
 import com.PhoenixTechSolutions.product1.model.Profile;
 import com.PhoenixTechSolutions.product1.model.User;
-import com.PhoenixTechSolutions.product1.repositiory.ProfileRepositiory;
+import com.PhoenixTechSolutions.product1.repositiory.ProfileRepository;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
 import jakarta.validation.Valid;
@@ -16,63 +16,121 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/profiles")
 public class ProfileController {
 
-    private final ProfileRepositiory profileRepository;
+    private final ProfileRepository profileRepository;
     private final UserRepositiory userRepository;
 
-    public ProfileController(ProfileRepositiory profileRepository, UserRepositiory userRepository) {
+    public ProfileController(ProfileRepository profileRepository, UserRepositiory userRepository) {
         this.profileRepository = profileRepository;
         this.userRepository = userRepository;
     }
 
     /**
-     * Create or update profile for logged-in user only
-     * Each user can only modify their own profile
+     * VIEW ANY PROFILE - Requires login
+     * Any authenticated user can view any profile
      */
-    @PostMapping("/me")
-    public ResponseEntity<?> createOrUpdateMyProfile(
-            @Valid @RequestBody ProfileRequest request,
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getProfileByUserId(
+            @PathVariable Long userId,
             Authentication authentication) {
         
-        User currentUser = (User) authentication.getPrincipal();
-        log.info("User {} creating/updating their own profile", currentUser.getEmail());
-
-        try {
-            Profile profile = profileRepository.findByUserId(currentUser.getId())
-                    .orElse(Profile.builder()
-                            .user(currentUser)
-                            .build());
-
-            // Update fields
-            if (request.bio() != null) profile.setBio(request.bio());
-            if (request.githubUrl() != null) profile.setGithubUrl(request.githubUrl());
-            if (request.linkedinUrl() != null) profile.setLinkedinUrl(request.linkedinUrl());
-
-            Profile savedProfile = profileRepository.save(profile);
-            log.info("Profile updated successfully for user: {}", currentUser.getEmail());
-
-            return ResponseEntity.ok(convertToResponse(savedProfile));
-
-        } catch (Exception e) {
-            log.error("Error updating profile for user: {}", currentUser.getEmail(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to save profile"));
+        // Check if user is logged in
+        if (authentication == null) {
+            log.warn("Unauthorized attempt to view profile ID: {}", userId);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required to view profiles"));
         }
+
+        User viewer = (User) authentication.getPrincipal();
+        log.debug("User {} viewing profile for user ID: {}", viewer.getEmail(), userId);
+
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElse(null);
+
+        if (profile == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Profile not found"));
+        }
+
+        // Return profile view (email hidden for others, visible for owner)
+        return ResponseEntity.ok(convertToProfileView(profile, viewer));
     }
 
     /**
-     * Get logged-in user's profile only
+     * VIEW PROFILE BY USERNAME - Requires login
+     */
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getProfileByUsername(
+            @PathVariable String username,
+            Authentication authentication) {
+        
+        // Check if user is logged in
+        if (authentication == null) {
+            log.warn("Unauthorized attempt to view profile for username: {}", username);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required to view profiles"));
+        }
+
+        User viewer = (User) authentication.getPrincipal();
+        log.debug("User {} viewing profile for username: {}", viewer.getEmail(), username);
+
+        User targetUser = userRepository.findByUsername(username)
+                .orElse(null);
+
+        if (targetUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "User not found"));
+        }
+
+        Profile profile = profileRepository.findByUserId(targetUser.getId())
+                .orElse(null);
+
+        if (profile == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Profile not found"));
+        }
+
+        return ResponseEntity.ok(convertToProfileView(profile, viewer));
+    }
+
+    /**
+     * LIST ALL PROFILES - Requires login
+     * Authenticated users can browse all profiles
+     */
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllProfiles(Authentication authentication) {
+        // Check if user is logged in
+        if (authentication == null) {
+            log.warn("Unauthorized attempt to view all profiles");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required to view profiles"));
+        }
+
+        User viewer = (User) authentication.getPrincipal();
+        log.debug("User {} viewing all profiles", viewer.getEmail());
+        
+        List<Map<String, Object>> profiles = profileRepository.findAll().stream()
+                .map(profile -> convertToProfileView(profile, viewer))
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(profiles);
+    }
+
+    /**
+     * GET OWN PROFILE - Full details
      */
     @GetMapping("/me")
     public ResponseEntity<?> getMyProfile(Authentication authentication) {
         User currentUser = (User) authentication.getPrincipal();
-        log.debug("User {} fetching their own profile", currentUser.getEmail());
+        log.debug("User {} viewing their own profile", currentUser.getEmail());
 
         Profile profile = profileRepository.findByUserId(currentUser.getId())
                 .orElse(null);
@@ -82,40 +140,45 @@ public class ProfileController {
                     .body(Map.of("error", "Profile not found. Please create one."));
         }
 
-        return ResponseEntity.ok(convertToResponse(profile));
+        // Return full profile (includes email for the owner)
+        return ResponseEntity.ok(convertToFullView(profile));
     }
 
     /**
-     * Get profile by user ID - Public read-only access
-     * Users cannot modify profiles through this endpoint
+     * CREATE/UPDATE OWN PROFILE
      */
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getProfileByUserId(@PathVariable Long userId) {
-        log.debug("Public access: Fetching profile for user ID: {}", userId);
-
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElse(null);
-
-        if (profile == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Profile not found for user ID: " + userId));
-        }
-
-        // Return only public information
-        return ResponseEntity.ok(convertToPublicResponse(profile));
-    }
-
-    /**
-     * Delete profile - Only owner or admin
-     */
-    @DeleteMapping("/{profileId}")
-    public ResponseEntity<?> deleteProfile(
-            @PathVariable Long profileId,
+    @PostMapping("/me")
+    public ResponseEntity<?> createOrUpdateMyProfile(
+            @Valid @RequestBody ProfileRequest request,
             Authentication authentication) {
         
         User currentUser = (User) authentication.getPrincipal();
+        log.info("User {} updating their profile", currentUser.getEmail());
+
+        Profile profile = profileRepository.findByUserId(currentUser.getId())
+                .orElse(Profile.builder()
+                        .user(currentUser)
+                        .build());
+
+        // Update fields
+        if (request.bio() != null) profile.setBio(request.bio());
+        if (request.githubUrl() != null) profile.setGithubUrl(request.githubUrl());
+        if (request.linkedinUrl() != null) profile.setLinkedinUrl(request.linkedinUrl());
+
+        Profile savedProfile = profileRepository.save(profile);
+        log.info("Profile updated for user: {}", currentUser.getEmail());
+
+        return ResponseEntity.ok(convertToFullView(savedProfile));
+    }
+
+    /**
+     * DELETE OWN PROFILE
+     */
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteMyProfile(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
         
-        Profile profile = profileRepository.findById(profileId)
+        Profile profile = profileRepository.findByUserId(currentUser.getId())
                 .orElse(null);
 
         if (profile == null) {
@@ -123,45 +186,34 @@ public class ProfileController {
                     .body(Map.of("error", "Profile not found"));
         }
 
-        //  ownership check
-        if (!profile.getUser().getId().equals(currentUser.getId())) {
-            log.warn("User {} attempted to delete profile belonging to user ID: {}", 
-                    currentUser.getEmail(), profile.getUser().getId());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", "You can only delete your own profile"));
-        }
-
         profileRepository.delete(profile);
-        log.info("User {} deleted their own profile", currentUser.getEmail());
+        log.info("User {} deleted their profile", currentUser.getEmail());
 
         return ResponseEntity.ok(Map.of("message", "Profile deleted successfully"));
     }
 
     /**
-     * Admin only - Get all profiles
+     * ADMIN ONLY - Get all profiles with full details
      */
     @GetMapping("/admin/all")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<?> getAllProfiles(Authentication authentication) {
+    public ResponseEntity<List<ProfileResponse>> getAllProfilesForAdmin(Authentication authentication) {
         User admin = (User) authentication.getPrincipal();
         log.info("Admin {} fetching all profiles", admin.getEmail());
 
-        var profiles = profileRepository.findAll().stream()
-                .map(this::convertToResponse)
-                .toList();
+        List<ProfileResponse> profiles = profileRepository.findAll().stream()
+                .map(this::convertToFullView)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(profiles);
     }
 
     /**
-     * Admin only - Delete any profile
+     * ADMIN ONLY - Delete any profile
      */
     @DeleteMapping("/admin/{profileId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<?> adminDeleteProfile(
-            @PathVariable Long profileId,
-            Authentication authentication) {
-        
+    public ResponseEntity<?> adminDeleteProfile(@PathVariable Long profileId, Authentication authentication) {
         User admin = (User) authentication.getPrincipal();
         
         Profile profile = profileRepository.findById(profileId)
@@ -173,14 +225,42 @@ public class ProfileController {
         }
 
         profileRepository.delete(profile);
-        log.info("Admin {} deleted profile ID: {} belonging to user: {}", 
-                admin.getEmail(), profileId, profile.getUser().getEmail());
+        log.info("Admin {} deleted profile ID: {}", admin.getEmail(), profileId);
 
-        return ResponseEntity.ok(Map.of("message", "Profile deleted successfully by admin"));
+        return ResponseEntity.ok(Map.of("message", "Profile deleted by admin"));
     }
 
-    // Helper methods
-    private ProfileResponse convertToResponse(Profile profile) {
+    /**
+     * PROFILE VIEW - For viewing other users' profiles
+     * Email is hidden unless viewer is the owner
+     */
+    private Map<String, Object> convertToProfileView(Profile profile, User viewer) {
+        User profileOwner = profile.getUser();
+        Map<String, Object> view = new HashMap<>();
+        
+        // Basic info always visible
+        view.put("id", profile.getId());
+        view.put("userId", profileOwner.getId());
+        view.put("username", profileOwner.getUsername());
+        view.put("name", profileOwner.getName());
+        view.put("bio", profile.getBio());
+        view.put("githubUrl", profile.getGithubUrl());
+        view.put("linkedinUrl", profile.getLinkedinUrl());
+        view.put("memberSince", profileOwner.getCreatedAt());
+        view.put("profileUpdated", profile.getUpdatedAt());
+        
+        // Email only visible to the profile owner
+        if (viewer.getId().equals(profileOwner.getId())) {
+            view.put("email", profileOwner.getEmail());
+        }
+        
+        return view;
+    }
+
+    /**
+     * FULL VIEW - For owner and admin
+     */
+    private ProfileResponse convertToFullView(Profile profile) {
         User user = profile.getUser();
         return new ProfileResponse(
             profile.getId(),
@@ -191,22 +271,8 @@ public class ProfileController {
             profile.getBio(),
             profile.getGithubUrl(),
             profile.getLinkedinUrl(),
-            profile.getCreatedAt(),
+            user.getCreatedAt(),
             profile.getUpdatedAt()
         );
-    }
-
-    private Map<String, Object> convertToPublicResponse(Profile profile) {
-        User user = profile.getUser();
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", profile.getId());
-        response.put("username", user.getUsername());
-        response.put("name", user.getName());
-        response.put("bio", profile.getBio());
-        response.put("githubUrl", profile.getGithubUrl());
-        response.put("linkedinUrl", profile.getLinkedinUrl());
-        response.put("createdAt", profile.getCreatedAt());
-        response.put("updatedAt", profile.getUpdatedAt());
-        return response;
     }
 }

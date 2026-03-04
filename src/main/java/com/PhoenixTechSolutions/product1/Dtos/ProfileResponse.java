@@ -1,5 +1,20 @@
 package com.PhoenixTechSolutions.product1.Dtos;
 
-public record ProfileResponse() {
+import java.time.LocalDateTime;
+
+public record ProfileResponse(
+
+    Long id,
+    Long userId,
+    String username,
+    String email,
+    String name,
+    String bio,
+    String githubUrl,
+    String linkedinUrl,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
+    
+) {
     
 }

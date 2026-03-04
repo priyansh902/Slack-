@@ -7,6 +7,8 @@ import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -81,6 +84,7 @@ public class UserController {
 
         // Check if username already taken
         if (userRepository.findByUsername(request.username()).isPresent()) {
+            log.warn("Registration failed - Username already taken: {}", request.username());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Username already taken");
             return ResponseEntity.badRequest().body(error);
@@ -100,29 +104,32 @@ public class UserController {
                 .createdAt(java.time.LocalDateTime.now())  // Set createdAt to current time
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         Map<String, String> success = new HashMap<>();
-        success.put("message", "User registered successfully");
-        success.put("email", user.getEmail());
-        success.put("username", user.getUsername());
-        success.put("role", user.getRole());
+            success.put("message", "User registered successfully");
+            success.put("email", user.getEmail());
+            success.put("username", user.getUsername());
+            success.put("role", user.getRole());
     
-        if (isFirstUser) {
-            success.put("warning", "IMPORTANT: You are the first user and have been granted ADMIN privileges. " +
-                               "You can now create other admins through the admin panel.");
-        
-        }
-            return ResponseEntity.ok(success); 
+            if (isFirstUser) {
+                success.put("warning", "IMPORTANT: You are the first user and have been granted ADMIN privileges. " +
+                                "You can now create other admins through the admin panel.");
+            
+                log.info("FIRST USER REGISTERED AS ADMIN: {}", savedUser.getEmail());
+            }
+         return ResponseEntity.ok(success); 
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
         if (authentication == null) {
+            log.warn("Unauthorized access to /me endpoint");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
         User user = (User) authentication.getPrincipal();
+        log.debug("User details accessed: {}", user.getEmail());
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", user.getId());

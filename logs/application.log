@@ -1,0 +1,58 @@
+2026-03-04 09:22:14 [main] INFO  c.P.product1.SlackApplication - Starting SlackApplication using Java 21.0.10 with PID 5520 (D:\product1\target\classes started by hp in d:\product1)
+2026-03-04 09:22:14 [main] DEBUG c.P.product1.SlackApplication - Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-04 09:22:14 [main] INFO  c.P.product1.SlackApplication - The following 1 profile is active: "dev"
+2026-03-04 09:22:15 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-04 09:22:15 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 74 ms. Found 1 JPA repository interface.
+2026-03-04 09:22:16 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-03-04 09:22:16 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-04 09:22:16 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-04 09:22:17 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 2527 ms
+2026-03-04 09:22:18 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-04 09:22:18 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-03-04 09:22:18 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5d68be4f
+2026-03-04 09:22:18 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-03-04 09:22:18 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-04 09:22:19 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-04 09:22:19 [main] INFO  o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-04 09:22:20 [main] DEBUG c.P.product1.Security.JwtAuthFilter - Filter 'jwtAuthFilter' configured for use
+2026-03-04 09:22:20 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userdetailsService
+2026-03-04 09:22:20 [main] WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-04 09:22:21 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-03-04 09:22:21 [main] INFO  c.P.product1.SlackApplication - Started SlackApplication in 8.433 seconds (process running for 9.153)
+2026-03-04 09:22:21 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-03-04 09:22:21 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-03-04 14:19:47 [main] INFO  c.P.product1.SlackApplication - Starting SlackApplication using Java 21.0.10 with PID 6668 (D:\product1\target\classes started by hp in D:\product1)
+2026-03-04 14:19:47 [main] DEBUG c.P.product1.SlackApplication - Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-04 14:19:47 [main] INFO  c.P.product1.SlackApplication - The following 1 profile is active: "dev"
+2026-03-04 14:19:48 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-04 14:19:48 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 74 ms. Found 1 JPA repository interface.
+2026-03-04 14:19:49 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-03-04 14:19:49 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-04 14:19:49 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-04 14:19:49 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 2370 ms
+2026-03-04 14:19:50 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-04 14:19:50 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-03-04 14:19:51 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@39685204
+2026-03-04 14:19:51 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-03-04 14:19:51 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-04 14:19:52 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-04 14:19:52 [main] INFO  o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-04 14:19:52 [main] DEBUG c.P.product1.Security.JwtAuthFilter - Filter 'jwtAuthFilter' configured for use
+2026-03-04 14:19:53 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userdetailsService
+2026-03-04 14:19:53 [main] WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-04 14:19:54 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-03-04 14:19:54 [main] INFO  c.P.product1.SlackApplication - Started SlackApplication in 7.672 seconds (process running for 8.196)
+2026-03-04 14:19:54 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-03-04 14:19:54 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-03-04 14:20:05 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-04 14:20:05 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-03-04 14:20:05 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 0 ms
+2026-03-04 14:24:00 [http-nio-8080-exec-4] DEBUG c.P.p.controllers.AdminController - Admin pk953666@gmail.com fetching all users
+2026-03-04 14:24:00 [http-nio-8080-exec-4] DEBUG c.P.p.controllers.AdminController - Retrieved 3 users
+2026-03-04 14:25:16 [http-nio-8080-exec-1] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported]
+2026-03-04 14:25:28 [http-nio-8080-exec-3] INFO  c.P.p.controllers.AdminController - Admin pk953666@gmail.com (ID: 1) attempting to make user ID: 2 an admin
+2026-03-04 14:25:28 [http-nio-8080-exec-3] INFO  c.P.p.controllers.AdminController - User jane@example.com promoted to admin by pk953666@gmail.com
+2026-03-04 14:26:26 [http-nio-8080-exec-9] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'POST' is not supported]
+2026-03-04 14:26:40 [http-nio-8080-exec-5] INFO  c.P.p.controllers.AdminController - Admin pk953666@gmail.com attempting to remove admin privileges from user ID: 2
+2026-03-04 14:26:40 [http-nio-8080-exec-5] INFO  c.P.p.controllers.AdminController - Admin privileges removed from jane@example.com by pk953666@gmail.com
+2026-03-04 14:27:40 [http-nio-8080-exec-6] INFO  c.P.p.controllers.AdminController - Admin pk953666@gmail.com attempting to remove admin privileges from user ID: 2

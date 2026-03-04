@@ -93,6 +93,7 @@ public class UserController {
                 .email(request.email().toLowerCase())
                 .password(passwordEncoder.encode(request.password()))
                 .role("ROLE_USER")
+                .createdAt(java.time.LocalDateTime.now())  // Set createdAt to current time
                 .build();
 
         userRepository.save(user);

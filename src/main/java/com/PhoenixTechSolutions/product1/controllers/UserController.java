@@ -86,13 +86,17 @@ public class UserController {
             return ResponseEntity.badRequest().body(error);
         }
 
+        // Check if this is the first user EVER
+        long userCount = userRepository.count();
+        boolean isFirstUser = userCount == 0;
+
         // Create new user
         User user = User.builder()
                 .name(request.name())
                 .username(request.username())
                 .email(request.email().toLowerCase())
                 .password(passwordEncoder.encode(request.password()))
-                .role("ROLE_USER")
+                .role(isFirstUser ? "ROLE_ADMIN" : "ROLE_USER")
                 .createdAt(java.time.LocalDateTime.now())  // Set createdAt to current time
                 .build();
 
@@ -102,8 +106,14 @@ public class UserController {
         success.put("message", "User registered successfully");
         success.put("email", user.getEmail());
         success.put("username", user.getUsername());
-
-        return ResponseEntity.ok(success);
+        success.put("role", user.getRole());
+    
+        if (isFirstUser) {
+            success.put("warning", "IMPORTANT: You are the first user and have been granted ADMIN privileges. " +
+                               "You can now create other admins through the admin panel.");
+        
+        }
+            return ResponseEntity.ok(success); 
     }
 
     @GetMapping("/me")

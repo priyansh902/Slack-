@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.URL;
 
 public record ProjectRequest(
+    
     @NotBlank(message = "Project title is required")
     @Size(min = 3, max = 100, message = "Title must be between 3 and 100 characters")
     String title,

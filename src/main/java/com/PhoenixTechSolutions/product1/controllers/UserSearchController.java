@@ -8,6 +8,7 @@ import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,14 +32,12 @@ public class UserSearchController {
 
     /**
      * SEARCH USERS BY USERNAME - Partial match, case insensitive
-     * Any logged-in user can search
      */
     @GetMapping("/username")
     public ResponseEntity<?> searchByUsername(
             @RequestParam String query,
             Authentication authentication) {
         
-        // Check if user is logged in
         if (authentication == null) {
             log.warn("Unauthorized search attempt by username");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -48,7 +47,6 @@ public class UserSearchController {
         User searcher = (User) authentication.getPrincipal();
         log.info("User {} searching users by username: '{}'", searcher.getEmail(), query);
 
-        // Validate query length
         if (query == null || query.trim().length() < 2) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Search query must be at least 2 characters"));
@@ -60,10 +58,7 @@ public class UserSearchController {
             List<User> users = userRepository.findByUsernameContainingIgnoreCase(query.trim());
             
             List<Map<String, Object>> results = users.stream()
-                    .map(user -> {
-                        Profile profile = profileRepository.findByUserId(user.getId()).orElse(null);
-                        return convertToSearchResult(user, profile, searcher);
-                    })
+                    .map(user -> convertToSearchResult(user, searcher))  // Removed profile parameter
                     .collect(Collectors.toList());
 
             long duration = System.currentTimeMillis() - startTime;
@@ -87,7 +82,6 @@ public class UserSearchController {
 
     /**
      * SEARCH USERS BY NAME - Partial match, case insensitive
-     * Any logged-in user can search
      */
     @GetMapping("/name")
     public ResponseEntity<?> searchByName(
@@ -113,10 +107,7 @@ public class UserSearchController {
             List<User> users = userRepository.findByNameContainingIgnoreCase(query.trim());
             
             List<Map<String, Object>> results = users.stream()
-                    .map(user -> {
-                        Profile profile = profileRepository.findByUserId(user.getId()).orElse(null);
-                        return convertToSearchResult(user, profile, searcher);
-                    })
+                    .map(user -> convertToSearchResult(user, searcher))
                     .collect(Collectors.toList());
 
             long duration = System.currentTimeMillis() - startTime;
@@ -140,7 +131,6 @@ public class UserSearchController {
 
     /**
      * SEARCH USERS BY KEYWORD - Searches both username and name
-     * Any logged-in user can search
      */
     @GetMapping("/keyword")
     public ResponseEntity<?> searchByKeyword(
@@ -168,10 +158,7 @@ public class UserSearchController {
                     searchTerm, searchTerm);
             
             List<Map<String, Object>> results = users.stream()
-                    .map(user -> {
-                        Profile profile = profileRepository.findByUserId(user.getId()).orElse(null);
-                        return convertToSearchResult(user, profile, searcher);
-                    })
+                    .map(user -> convertToSearchResult(user, searcher))
                     .collect(Collectors.toList());
 
             long duration = System.currentTimeMillis() - startTime;
@@ -219,12 +206,7 @@ public class UserSearchController {
                         .body(Map.of("error", "User not found with ID: " + userId));
             }
 
-            Profile profile = profileRepository.findByUserId(userId).orElse(null);
-            
-            log.info("User {} found user by ID: {} - Username: {}", 
-                    searcher.getEmail(), userId, targetUser.getUsername());
-            
-            return ResponseEntity.ok(convertToSearchResult(targetUser, profile, searcher));
+            return ResponseEntity.ok(convertToSearchResult(targetUser, searcher));
 
         } catch (Exception e) {
             log.error("User lookup by ID failed for user {}: {}", searcher.getEmail(), e.getMessage(), e);
@@ -260,12 +242,7 @@ public class UserSearchController {
                         .body(Map.of("error", "User not found with username: " + username));
             }
 
-            Profile profile = profileRepository.findByUserId(targetUser.getId()).orElse(null);
-            
-            log.info("User {} found user by username: '{}' - ID: {}", 
-                    searcher.getEmail(), username, targetUser.getId());
-            
-            return ResponseEntity.ok(convertToSearchResult(targetUser, profile, searcher));
+            return ResponseEntity.ok(convertToSearchResult(targetUser, searcher));
 
         } catch (Exception e) {
             log.error("User lookup by username failed for user {}: {}", searcher.getEmail(), e.getMessage(), e);
@@ -276,7 +253,6 @@ public class UserSearchController {
 
     /**
      * AUTOCOMPLETE SUGGESTIONS - For search bars
-     * Returns limited fields for fast response
      */
     @GetMapping("/suggestions")
     public ResponseEntity<?> getSearchSuggestions(
@@ -304,13 +280,16 @@ public class UserSearchController {
             List<Map<String, Object>> suggestions = userRepository
                     .findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(searchTerm, searchTerm)
                     .stream()
-                    .limit(10)  // Limit for performance
+                    .limit(10)
                     .map(user -> {
                         Map<String, Object> suggestion = new HashMap<>();
                         suggestion.put("userId", user.getId());
                         suggestion.put("username", user.getUsername());
                         suggestion.put("name", user.getName());
-                        suggestion.put("hasProfile", profileRepository.existsByUserId(user.getId()));
+                        suggestion.put("hasProfile", user.hasProfile());  // Using helper!
+                        suggestion.put("profileId", user.getProfile() != null ? user.getProfile().getId() : null);
+                        suggestion.put("projectCount", user.getProjectCount());  // Using helper!
+                        suggestion.put("hasProjects", user.hasProjects());  // Using helper!
                         return suggestion;
                     })
                     .collect(Collectors.toList());
@@ -351,16 +330,12 @@ public class UserSearchController {
         log.debug("User {} requesting recent users (limit: {})", searcher.getEmail(), limit);
 
         try {
-            // Limit to reasonable number
             int resultLimit = Math.min(limit, 50);
             
             List<User> recentUsers = userRepository.findTopUsersByOrderByCreatedAtDesc(resultLimit);
             
             List<Map<String, Object>> results = recentUsers.stream()
-                    .map(user -> {
-                        Profile profile = profileRepository.findByUserId(user.getId()).orElse(null);
-                        return convertToSearchResult(user, profile, searcher);
-                    })
+                    .map(user -> convertToSearchResult(user, searcher))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(Map.of(
@@ -375,12 +350,49 @@ public class UserSearchController {
         }
     }
 
-    // HELPER METHODS 
+    /**
+     * GET USER STATS - Get user statistics (admin only)
+     */
+    @GetMapping("/stats/{userId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> getUserStats(@PathVariable Long userId, Authentication authentication) {
+        User admin = (User) authentication.getPrincipal();
+        
+        User targetUser = userRepository.findById(userId)
+                .orElse(null);
+
+        if (targetUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "User not found"));
+        }
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("userId", targetUser.getId());
+        stats.put("username", targetUser.getUsername());
+        stats.put("name", targetUser.getName());
+        stats.put("email", targetUser.getEmail());
+        stats.put("role", targetUser.getRole());
+        stats.put("hasProfile", targetUser.hasProfile());           // Using helper
+        stats.put("projectCount", targetUser.getProjectCount());    // Using helper
+        stats.put("hasProjects", targetUser.hasProjects());         // Using helper
+        stats.put("memberSince", targetUser.getCreatedAt());
+        
+        if (targetUser.hasProfile()) {
+            stats.put("profileId", targetUser.getProfile().getId());
+            stats.put("bio", targetUser.getProfile().getBio());
+        }
+
+        log.info("Admin {} viewed stats for user {}", admin.getEmail(), targetUser.getEmail());
+        
+        return ResponseEntity.ok(stats);
+    }
+
+    //  UPDATED HELPER METHOD 
 
     /**
-     * Convert user to search result format
+     * Convert user to search result format - USING HELPER METHODS
      */
-    private Map<String, Object> convertToSearchResult(User user, Profile profile, User searcher) {
+    private Map<String, Object> convertToSearchResult(User user, User searcher) {
         Map<String, Object> result = new HashMap<>();
         
         // Basic user info
@@ -389,16 +401,20 @@ public class UserSearchController {
         result.put("name", user.getName());
         result.put("memberSince", user.getCreatedAt());
         
-        // Profile info if exists
-        if (profile != null) {
+        // Profile info using helper methods
+        result.put("hasProfile", user.hasProfile());  // Using helper!
+        
+        if (user.hasProfile()) {  // Using helper!
+            Profile profile = user.getProfile();  // Now this works!
             result.put("profileId", profile.getId());
             result.put("bio", truncate(profile.getBio(), 100));
             result.put("githubUrl", profile.getGithubUrl());
             result.put("linkedinUrl", profile.getLinkedinUrl());
-            result.put("hasProfile", true);
-        } else {
-            result.put("hasProfile", false);
         }
+        
+        // Project info using helper methods
+        result.put("hasProjects", user.hasProjects());        // Using helper!
+        result.put("projectCount", user.getProjectCount());   // Using helper!
         
         // Indicate if this is the searcher's own profile
         result.put("isYou", searcher.getId().equals(user.getId()));

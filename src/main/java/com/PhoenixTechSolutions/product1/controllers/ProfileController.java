@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,14 +37,13 @@ public class ProfileController {
 
     /**
      * VIEW ANY PROFILE - Requires login
-     * Any authenticated user can view any profile
      */
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getProfileByUserId(
             @PathVariable Long userId,
             Authentication authentication) {
         
-        // Check if user is logged in
+        // Check authentication
         if (authentication == null) {
             log.warn("Unauthorized attempt to view profile ID: {}", userId);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -50,17 +51,30 @@ public class ProfileController {
         }
 
         User viewer = (User) authentication.getPrincipal();
-        log.debug("User {} viewing profile for user ID: {}", viewer.getEmail(), userId);
-
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElse(null);
-
-        if (profile == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Profile not found"));
+        if (viewer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid authentication"));
         }
 
-        // Return profile view (email hidden for others, visible for owner)
+        log.debug("User {} viewing profile for user ID: {}", viewer.getEmail(), userId);
+
+        // Find profile safely
+        Optional<Profile> profileOpt = profileRepository.findByUserId(userId);
+        
+        if (profileOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Profile not found for user ID: " + userId));
+        }
+
+        Profile profile = profileOpt.get();
+        
+        // Validate profile has user
+        if (profile.getUser() == null) {
+            log.error("Profile {} has no associated user", profile.getId());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Profile data is corrupted"));
+        }
+
         return ResponseEntity.ok(convertToProfileView(profile, viewer));
     }
 
@@ -72,7 +86,6 @@ public class ProfileController {
             @PathVariable String username,
             Authentication authentication) {
         
-        // Check if user is logged in
         if (authentication == null) {
             log.warn("Unauthorized attempt to view profile for username: {}", username);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -80,22 +93,37 @@ public class ProfileController {
         }
 
         User viewer = (User) authentication.getPrincipal();
-        log.debug("User {} viewing profile for username: {}", viewer.getEmail(), username);
-
-        User targetUser = userRepository.findByUsername(username)
-                .orElse(null);
-
-        if (targetUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "User not found"));
+        if (viewer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid authentication"));
         }
 
-        Profile profile = profileRepository.findByUserId(targetUser.getId())
-                .orElse(null);
+        log.debug("User {} viewing profile for username: {}", viewer.getEmail(), username);
 
-        if (profile == null) {
+        // Find user by username
+        Optional<User> targetUserOpt = userRepository.findByUsername(username);
+        
+        if (targetUserOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Profile not found"));
+                    .body(Map.of("error", "User not found with username: " + username));
+        }
+
+        User targetUser = targetUserOpt.get();
+        
+        // Find profile by user ID
+        Optional<Profile> profileOpt = profileRepository.findByUserId(targetUser.getId());
+        
+        if (profileOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Profile not found for user: " + username));
+        }
+
+        Profile profile = profileOpt.get();
+        
+        if (profile.getUser() == null) {
+            log.error("Profile {} has no associated user", profile.getId());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Profile data is corrupted"));
         }
 
         return ResponseEntity.ok(convertToProfileView(profile, viewer));
@@ -103,11 +131,9 @@ public class ProfileController {
 
     /**
      * LIST ALL PROFILES - Requires login
-     * Authenticated users can browse all profiles
      */
     @GetMapping("/all")
     public ResponseEntity<?> getAllProfiles(Authentication authentication) {
-        // Check if user is logged in
         if (authentication == null) {
             log.warn("Unauthorized attempt to view all profiles");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -115,13 +141,23 @@ public class ProfileController {
         }
 
         User viewer = (User) authentication.getPrincipal();
+        if (viewer == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid authentication"));
+        }
+
         log.debug("User {} viewing all profiles", viewer.getEmail());
         
         List<Map<String, Object>> profiles = profileRepository.findAll().stream()
+                .filter(Objects::nonNull)
+                .filter(p -> p.getUser() != null)  // Only include profiles with valid users
                 .map(profile -> convertToProfileView(profile, viewer))
                 .collect(Collectors.toList());
         
-        return ResponseEntity.ok(profiles);
+        return ResponseEntity.ok(Map.of(
+            "count", profiles.size(),
+            "profiles", profiles
+        ));
     }
 
     /**
@@ -129,46 +165,100 @@ public class ProfileController {
      */
     @GetMapping("/me")
     public ResponseEntity<?> getMyProfile(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required"));
+        }
+
         User currentUser = (User) authentication.getPrincipal();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid authentication"));
+        }
+
         log.debug("User {} viewing their own profile", currentUser.getEmail());
 
-        Profile profile = profileRepository.findByUserId(currentUser.getId())
-                .orElse(null);
+        // Safe way to get profile
+        Profile profile = null;
+        try {
+            profile = currentUser.getProfile();
+        } catch (Exception e) {
+            log.debug("Error accessing profile: {}", e.getMessage());
+        }
 
         if (profile == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Profile not found. Please create one."));
         }
 
-        // Return full profile (includes email for the owner)
         return ResponseEntity.ok(convertToFullView(profile));
     }
 
+   
     /**
-     * CREATE/UPDATE OWN PROFILE
+     * CREATE/UPDATE OWN PROFILE - Using Optional for cleaner code
      */
     @PostMapping("/me")
     public ResponseEntity<?> createOrUpdateMyProfile(
             @Valid @RequestBody ProfileRequest request,
             Authentication authentication) {
         
+        // Validate authentication
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required"));
+        }
+
         User currentUser = (User) authentication.getPrincipal();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "User authentication error"));
+        }
+
         log.info("User {} updating their profile", currentUser.getEmail());
 
-        Profile profile = profileRepository.findByUserId(currentUser.getId())
-                .orElse(Profile.builder()
-                        .user(currentUser)
-                        .build());
+        try {
+            // Use Optional to handle null safely
+            Optional<Profile> existingProfileOpt = Optional.ofNullable(currentUser.getProfile());
+            
+            Profile profile;
+            boolean isNew;
+            
+            if (existingProfileOpt.isEmpty()) {
+                // Create new profile
+                isNew = true;
+                profile = Profile.builder()
+                        .bio(Optional.ofNullable(request.bio()).orElse(""))
+                        .githubUrl(request.githubUrl())
+                        .linkedinUrl(request.linkedinUrl())
+                        .build();
+                
+                currentUser.setProfile(profile);
+                log.debug("Creating new profile for user: {}", currentUser.getEmail());
+                
+            } else {
+                // Update existing profile
+                isNew = false;
+                profile = existingProfileOpt.get();  // Safe - we checked isEmpty()
+                
+                Optional.ofNullable(request.bio()).ifPresent(profile::setBio);
+                Optional.ofNullable(request.githubUrl()).ifPresent(profile::setGithubUrl);
+                Optional.ofNullable(request.linkedinUrl()).ifPresent(profile::setLinkedinUrl);
+                
+                log.debug("Updating existing profile ID: {} for user: {}", 
+                        profile.getId(), currentUser.getEmail());
+            }
 
-        // Update fields
-        if (request.bio() != null) profile.setBio(request.bio());
-        if (request.githubUrl() != null) profile.setGithubUrl(request.githubUrl());
-        if (request.linkedinUrl() != null) profile.setLinkedinUrl(request.linkedinUrl());
+            // Save and return
+            Profile savedProfile = profileRepository.save(profile);
+            
+            return ResponseEntity.ok(convertToFullView(savedProfile));
 
-        Profile savedProfile = profileRepository.save(profile);
-        log.info("Profile updated for user: {}", currentUser.getEmail());
-
-        return ResponseEntity.ok(convertToFullView(savedProfile));
+        } catch (Exception e) {
+            log.error("Error updating profile: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to update profile"));
+        }
     }
 
     /**
@@ -176,20 +266,65 @@ public class ProfileController {
      */
     @DeleteMapping("/me")
     public ResponseEntity<?> deleteMyProfile(Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal();
-        
-        Profile profile = profileRepository.findByUserId(currentUser.getId())
-                .orElse(null);
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required"));
+        }
 
+        User currentUser = (User) authentication.getPrincipal();
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid authentication"));
+        }
+
+        // Check if user has a profile safely
+        boolean hasProfile = false;
+        try {
+            hasProfile = currentUser.hasProfile();
+        } catch (Exception e) {
+            log.debug("Error checking profile: {}", e.getMessage());
+        }
+        
+        if (!hasProfile) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Profile not found"));
+        }
+
+        // Get profile safely
+        Profile profile = null;
+        try {
+            profile = currentUser.getProfile();
+        } catch (Exception e) {
+            log.error("Error getting profile: {}", e.getMessage());
+        }
+        
         if (profile == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Profile not found"));
         }
 
-        profileRepository.delete(profile);
+        // Use helper method to clean up relationship
+        try {
+            currentUser.removeProfile();
+        } catch (Exception e) {
+            log.error("Error removing profile relationship: {}", e.getMessage());
+        }
+        
+        // Delete the profile
+        try {
+            profileRepository.delete(profile);
+        } catch (Exception e) {
+            log.error("Error deleting profile: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to delete profile"));
+        }
+        
         log.info("User {} deleted their profile", currentUser.getEmail());
-
-        return ResponseEntity.ok(Map.of("message", "Profile deleted successfully"));
+        
+        return ResponseEntity.ok(Map.of(
+            "message", "Profile deleted successfully",
+            "deletedProfileId", profile.getId()
+        ));
     }
 
     /**
@@ -197,15 +332,30 @@ public class ProfileController {
      */
     @GetMapping("/admin/all")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<ProfileResponse>> getAllProfilesForAdmin(Authentication authentication) {
+    public ResponseEntity<?> getAllProfilesForAdmin(Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required"));
+        }
+
         User admin = (User) authentication.getPrincipal();
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid authentication"));
+        }
+
         log.info("Admin {} fetching all profiles", admin.getEmail());
 
         List<ProfileResponse> profiles = profileRepository.findAll().stream()
+                .filter(Objects::nonNull)
+                .filter(p -> p.getUser() != null)
                 .map(this::convertToFullView)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(profiles);
+        return ResponseEntity.ok(Map.of(
+            "count", profiles.size(),
+            "profiles", profiles
+        ));
     }
 
     /**
@@ -213,44 +363,97 @@ public class ProfileController {
      */
     @DeleteMapping("/admin/{profileId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<?> adminDeleteProfile(@PathVariable Long profileId, Authentication authentication) {
-        User admin = (User) authentication.getPrincipal();
+    public ResponseEntity<?> adminDeleteProfile(
+            @PathVariable Long profileId, 
+            Authentication authentication) {
         
-        Profile profile = profileRepository.findById(profileId)
-                .orElse(null);
-
-        if (profile == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Profile not found"));
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Login required"));
         }
 
-        profileRepository.delete(profile);
-        log.info("Admin {} deleted profile ID: {}", admin.getEmail(), profileId);
+        User admin = (User) authentication.getPrincipal();
+        if (admin == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid authentication"));
+        }
+        
+        // Find profile safely
+        Optional<Profile> profileOpt = profileRepository.findById(profileId);
+        
+        if (profileOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Profile not found with ID: " + profileId));
+        }
 
-        return ResponseEntity.ok(Map.of("message", "Profile deleted by admin"));
+        Profile profile = profileOpt.get();
+        User profileOwner = profile.getUser();
+        
+        // Clean up relationship if owner exists
+        if (profileOwner != null) {
+            try {
+                profileOwner.removeProfile();
+            } catch (Exception e) {
+                log.error("Error removing profile relationship: {}", e.getMessage());
+            }
+        }
+        
+        // Delete the profile
+        try {
+            profileRepository.delete(profile);
+        } catch (Exception e) {
+            log.error("Error deleting profile: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to delete profile"));
+        }
+        
+        String ownerEmail = (profileOwner != null) ? profileOwner.getEmail() : "unknown";
+        log.warn("Admin {} deleted profile ID: {} belonging to user: {}", 
+                admin.getEmail(), profileId, ownerEmail);
+
+        return ResponseEntity.ok(Map.of(
+            "message", "Profile deleted by admin",
+            "deletedProfileId", profileId
+        ));
     }
+
+    // ========== HELPER METHODS ==========
 
     /**
      * PROFILE VIEW - For viewing other users' profiles
-     * Email is hidden unless viewer is the owner
      */
     private Map<String, Object> convertToProfileView(Profile profile, User viewer) {
+        // This method is only called after profile and profile.getUser() are validated
         User profileOwner = profile.getUser();
+        
         Map<String, Object> view = new HashMap<>();
         
-        // Basic info always visible
+        // Profile info
         view.put("id", profile.getId());
+        view.put("bio", profile.getBio() != null ? profile.getBio() : "");
+        view.put("githubUrl", profile.getGithubUrl());
+        view.put("linkedinUrl", profile.getLinkedinUrl());
+        view.put("profileUpdated", profile.getUpdatedAt());
+        
+        // User info
         view.put("userId", profileOwner.getId());
         view.put("username", profileOwner.getUsername());
         view.put("name", profileOwner.getName());
-        view.put("bio", profile.getBio());
-        view.put("githubUrl", profile.getGithubUrl());
-        view.put("linkedinUrl", profile.getLinkedinUrl());
         view.put("memberSince", profileOwner.getCreatedAt());
-        view.put("profileUpdated", profile.getUpdatedAt());
         
-        // Email only visible to the profile owner
-        if (viewer.getId().equals(profileOwner.getId())) {
+        // Project info
+        try {
+            view.put("hasProjects", profileOwner.hasProjects());
+            view.put("projectCount", profileOwner.getProjectCount());
+        } catch (Exception e) {
+            log.debug("Error getting project info: {}", e.getMessage());
+            view.put("hasProjects", false);
+            view.put("projectCount", 0);
+        }
+        
+        // Email only visible to the profile owner or admin
+        if (viewer != null && (viewer.getId().equals(profileOwner.getId()) || 
+                               "ROLE_ADMIN".equals(viewer.getRole()))) {
             view.put("email", profileOwner.getEmail());
         }
         
@@ -261,14 +464,16 @@ public class ProfileController {
      * FULL VIEW - For owner and admin
      */
     private ProfileResponse convertToFullView(Profile profile) {
+        // This method is only called after profile and profile.getUser() are validated
         User user = profile.getUser();
+        
         return new ProfileResponse(
             profile.getId(),
             user.getId(),
             user.getUsername(),
             user.getEmail(),
             user.getName(),
-            profile.getBio(),
+            profile.getBio() != null ? profile.getBio() : "",
             profile.getGithubUrl(),
             profile.getLinkedinUrl(),
             user.getCreatedAt(),

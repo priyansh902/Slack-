@@ -239,7 +239,7 @@ public class ProfileController {
             } else {
                 // Update existing profile
                 isNew = false;
-                profile = existingProfileOpt.get();  // Safe - we checked isEmpty()
+                profile = existingProfileOpt.get();  
                 
                 Optional.ofNullable(request.bio()).ifPresent(profile::setBio);
                 Optional.ofNullable(request.githubUrl()).ifPresent(profile::setGithubUrl);
@@ -378,7 +378,7 @@ public class ProfileController {
                     .body(Map.of("error", "Invalid authentication"));
         }
         
-        // Find profile safely
+        
         Optional<Profile> profileOpt = profileRepository.findById(profileId);
         
         if (profileOpt.isEmpty()) {
@@ -417,7 +417,7 @@ public class ProfileController {
         ));
     }
 
-    // ========== HELPER METHODS ==========
+    // HELPER METHODS 
 
     /**
      * PROFILE VIEW - For viewing other users' profiles

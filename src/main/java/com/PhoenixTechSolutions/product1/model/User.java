@@ -14,6 +14,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -32,7 +33,7 @@ import lombok.Setter;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -57,19 +58,18 @@ public class User implements UserDetails {
     private Profile profile;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default  // This ensures the list is initialized when using Builder
+    @Builder.Default
     private List<Projects> projects = new ArrayList<>();
 
-    // HELPER METHODS FOR PROFILE 
+    //  HELPER METHODS FOR PROFILE ==========
 
     /**
      * Helper method to set profile maintaining bidirectional relationship
-     * Use this instead of directly setting profile
      */
     public void setProfile(Profile profile) {
         this.profile = profile;
         if (profile != null) {
-            profile.setUser(this);  // Maintain bidirectional consistency
+            profile.setUser(this);
         }
     }
 
@@ -78,8 +78,8 @@ public class User implements UserDetails {
      */
     public void removeProfile() {
         if (this.profile != null) {
-            this.profile.setUser(null);  
-            this.profile = null;         
+            this.profile.setUser(null);
+            this.profile = null;
         }
     }
 
@@ -90,13 +90,14 @@ public class User implements UserDetails {
         return this.profile != null;
     }
 
-    //  HELPER METHODS FOR PROJECTS 
+    // ========== HELPER METHODS FOR PROJECTS 
 
     /**
      * Helper method to add a project maintaining bidirectional relationship
+     * FIXED: Parameter name conflict resolved
      */
-    public void addProject(Projects projects) {
-        if (projects == null) {
+    public void addProject(Projects project) { 
+        if (project == null) {                
             return;
         }
         
@@ -104,8 +105,8 @@ public class User implements UserDetails {
             this.projects = new ArrayList<>();
         }
         
-        this.projects.add(projects);
-        projects.setUser(this);  // Maintain bidirectional consistency
+        this.projects.add(project);              
+        project.setUser(this);             // Set the user reference in the project to maintain bidirectional relationship      
     }
 
     /**
@@ -117,7 +118,7 @@ public class User implements UserDetails {
         }
         
         for (Projects project : projects) {
-            addProject(project);
+            addProject(project);                  
         }
     }
 
@@ -130,7 +131,7 @@ public class User implements UserDetails {
         }
         
         this.projects.remove(project);
-        project.setUser(null);  
+        project.setUser(null);
     }
 
     /**
@@ -143,7 +144,7 @@ public class User implements UserDetails {
         
         return this.projects.removeIf(project -> {
             if (project.getId() != null && project.getId().equals(projectId)) {
-                project.setUser(null);  // Break the relationship
+                project.setUser(null);
                 return true;
             }
             return false;
@@ -189,7 +190,7 @@ public class User implements UserDetails {
         return projects != null && !projects.isEmpty();
     }
 
-    // OTHER UTILITY METHODS 
+    //  OTHER UTILITY METHODS 
 
     /**
      * Check if user is admin
@@ -199,13 +200,13 @@ public class User implements UserDetails {
     }
 
     /**
-     * Get user's display name (prefer username if name is empty)
+     * Get user's display name
      */
     public String getDisplayName() {
         return name != null && !name.isEmpty() ? name : username;
     }
 
-    //  SECURITY METHODS 
+    // ========== SECURITY METHODS ==========
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -214,7 +215,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;  
+        return email;
     }
 
     @Override

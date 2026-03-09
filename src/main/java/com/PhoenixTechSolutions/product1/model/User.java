@@ -94,7 +94,7 @@ public class User implements UserDetails {
 
     /**
      * Helper method to add a project maintaining bidirectional relationship
-     * FIXED: Parameter name conflict resolved
+     * 
      */
     public void addProject(Projects project) { 
         if (project == null) {                

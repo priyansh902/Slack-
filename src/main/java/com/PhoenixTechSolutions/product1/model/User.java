@@ -206,6 +206,40 @@ public class User implements UserDetails {
         return name != null && !name.isEmpty() ? name : username;
     }
 
+    // Resume Methods 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Resume resume;
+
+    // Helper method to set resume maintaining bidirectional relationship
+
+
+    /**
+     * Helper method to set resume maintaining bidirectional relationship
+     */
+    public void setResume(Resume resume) {
+        this.resume = resume;
+        if (resume != null) {
+            resume.setUser(this);
+        }
+    }
+
+    /**
+     * Helper method to remove the resume maintaining bidirectional relationship
+     */
+    public void removeResume() {
+        if (this.resume != null) {
+            this.resume.setUser(null);
+            this.resume = null;
+        }
+    }
+
+    /**
+     * Check if user has a resume
+     */
+    public boolean hasResume() {
+        return this.resume != null;
+    }
+
     // ========== SECURITY METHODS ==========
 
     @Override

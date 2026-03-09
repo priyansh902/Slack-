@@ -18,7 +18,7 @@ public interface ResumeRepositiory extends JpaRepository<Resume, Long> {
      Optional <Resume> findByUsername(@P("username") String username);
 
      // Check if a resume exists for a given user ID
-     boolean exiexistsByUserId(Long userId);
+     boolean existsByUserId(Long userId);
 
      // Retrieve all resumes (Admin functionality)
      List<Resume> findAll();

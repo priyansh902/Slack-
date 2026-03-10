@@ -283,15 +283,20 @@ public class ProjectController {
                     .body(Map.of("error", "Login required"));
         }
 
-        User currentUser = (User) authentication.getPrincipal();
-        if (currentUser == null) {
+        User authenticatedUser = (User) authentication.getPrincipal();
+        if (authenticatedUser == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "User authentication error"));
         }
 
-        log.info("User {} creating new project: '{}'", currentUser.getEmail(), request.title());
+        log.info("User {} creating new project: '{}'", authenticatedUser.getEmail(), request.title());
 
         try {
+           
+            User currentUser = userRepository.findById(authenticatedUser.getId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Create project
             Projects project = Projects.builder()
                     .title(request.title())
                     .description(request.description() != null ? request.description() : "")
@@ -300,11 +305,12 @@ public class ProjectController {
                     .liveLink(request.liveLink())
                     .build();
 
-            // Use helper method to maintain bidirectional relationship
-            currentUser.addProject(project);
-
+            // Set the user on the project directly (don't use helper method)
+            project.setUser(currentUser);
+            
+            // Save the project (this will persist the relationship)
             Projects savedProject = projectRepository.save(project);
-
+            
             log.info("Project created successfully - ID: {}, Title: '{}', User: {}", 
                     savedProject.getId(), savedProject.getTitle(), currentUser.getEmail());
 
@@ -312,9 +318,10 @@ public class ProjectController {
                     .body(convertToResponse(savedProject));
 
         } catch (Exception e) {
-            log.error("Failed to create project for user {}: {}", currentUser.getEmail(), e.getMessage(), e);
+            log.error("Failed to create project for user {}: {}", 
+                    authenticatedUser.getEmail(), e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to create project"));
+                    .body(Map.of("error", "Failed to create project: " + e.getMessage()));
         }
     }
 
@@ -332,12 +339,8 @@ public class ProjectController {
                     .body(Map.of("error", "Login required"));
         }
 
-        User currentUser = (User) authentication.getPrincipal();
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "User authentication error"));
-        }
-
+        User authenticatedUser = (User) authentication.getPrincipal();
+        
         Optional<Projects> projectOpt = projectRepository.findById(projectId);
         
         if (projectOpt.isEmpty()) {
@@ -349,51 +352,40 @@ public class ProjectController {
         Projects project = projectOpt.get();
 
         // Check if user owns this project
-        if (project.getUser() == null || !project.getUser().getId().equals(currentUser.getId())) {
+        if (project.getUser() == null || !project.getUser().getId().equals(authenticatedUser.getId())) {
             log.warn("User {} attempted to update project belonging to another user", 
-                    currentUser.getEmail());
+                    authenticatedUser.getEmail());
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "You can only update your own projects"));
         }
 
-        log.info("User {} updating project ID: {}", currentUser.getEmail(), projectId);
+        log.info("User {} updating project ID: {}", authenticatedUser.getEmail(), projectId);
 
-        // Track changes for logging
-        StringBuilder changes = new StringBuilder();
-
-        if (!project.getTitle().equals(request.title())) {
-            changes.append("title, ");
+        // Update fields
+        if (request.title() != null && !request.title().equals(project.getTitle())) {
             project.setTitle(request.title());
         }
 
-        if (request.description() != null && !request.description().equals(project.getDescription())) {
-            changes.append("description, ");
+        if (request.description() != null) {
             project.setDescription(request.description());
         }
 
-        if (request.techStack() != null && !request.techStack().equals(project.getTechStack())) {
-            changes.append("techStack, ");
+        if (request.techStack() != null) {
             project.setTechStack(request.techStack());
         }
 
-        if (request.githubLink() != null && !request.githubLink().equals(project.getGithubLink())) {
-            changes.append("githubLink, ");
+        if (request.githubLink() != null) {
             project.setGithubLink(request.githubLink());
         }
 
-        if (request.liveLink() != null && !request.liveLink().equals(project.getLiveLink())) {
-            changes.append("liveLink, ");
+        if (request.liveLink() != null) {
             project.setLiveLink(request.liveLink());
         }
 
         Projects updatedProject = projectRepository.save(project);
 
-        log.info("Project updated - ID: {}, Changes: [{}]", 
-                projectId, changes.length() > 0 ? changes.substring(0, changes.length() - 2) : "no changes");
-
         return ResponseEntity.ok(convertToResponse(updatedProject));
     }
-
     /**
      * Delete a project (only if owner)
      */
@@ -407,11 +399,7 @@ public class ProjectController {
                     .body(Map.of("error", "Login required"));
         }
 
-        User currentUser = (User) authentication.getPrincipal();
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "User authentication error"));
-        }
+        User authenticatedUser = (User) authentication.getPrincipal();
 
         Optional<Projects> projectOpt = projectRepository.findById(projectId);
         
@@ -424,20 +412,18 @@ public class ProjectController {
         Projects project = projectOpt.get();
 
         // Check if user owns this project
-        if (project.getUser() == null || !project.getUser().getId().equals(currentUser.getId())) {
+        if (project.getUser() == null || !project.getUser().getId().equals(authenticatedUser.getId())) {
             log.warn("User {} attempted to delete project belonging to another user", 
-                    currentUser.getEmail());
+                    authenticatedUser.getEmail());
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "You can only delete your own projects"));
         }
 
-        // Use helper method to clean up relationship
-        currentUser.removeProject(project);
-        
+        // Delete the project directly (don't need to remove from user's collection)
         projectRepository.delete(project);
         
         log.warn("Project deleted - ID: {}, Title: '{}', User: {}", 
-                projectId, project.getTitle(), currentUser.getEmail());
+                projectId, project.getTitle(), authenticatedUser.getEmail());
 
         return ResponseEntity.ok(Map.of(
             "message", "Project deleted successfully",

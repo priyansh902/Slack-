@@ -15,7 +15,7 @@ public record ProfileRequest(
     @URL(message = "Invalid GitHub URL format")
     String githubUrl,
     
-    @URL(message = "Invalid LinkedIn URL format, must start with http:// or https://" )
+    @URL(message = "Invalid LinkedIn URL format, must start with http:// or https://" ) 
     String linkedinUrl
 ) {
     

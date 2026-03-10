@@ -25,16 +25,19 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class Profile {
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@OneToOne
-@JoinColumn(name = "user_id", nullable = false, unique = true)
-private User user;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
-@Column(nullable = false, length = 500)
-private String bio;
+    @Column(nullable = false, length = 500)
+    private String bio;
+
+    @Column(length = 500)
+    private String skills;
 
     @Column(name = "github_url")
     private String githubUrl;

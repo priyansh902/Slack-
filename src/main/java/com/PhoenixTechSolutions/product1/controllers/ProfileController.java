@@ -15,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -196,7 +198,7 @@ public class ProfileController {
 
    
     /**
-     * CREATE/UPDATE OWN PROFILE - Using Optional for cleaner code
+     * CREATE/UPDATE OWN PROFILE
      */
     @PostMapping("/me")
     public ResponseEntity<?> createOrUpdateMyProfile(
@@ -229,6 +231,7 @@ public class ProfileController {
                 isNew = true;
                 profile = Profile.builder()
                         .bio(Optional.ofNullable(request.bio()).orElse(""))
+                        .skills(Optional.ofNullable(request.skills()).orElse(""))
                         .githubUrl(request.githubUrl())
                         .linkedinUrl(request.linkedinUrl())
                         .build();
@@ -242,6 +245,7 @@ public class ProfileController {
                 profile = existingProfileOpt.get();  
                 
                 Optional.ofNullable(request.bio()).ifPresent(profile::setBio);
+                Optional.ofNullable(request.skills()).ifPresent(profile::setSkills);
                 Optional.ofNullable(request.githubUrl()).ifPresent(profile::setGithubUrl);
                 Optional.ofNullable(request.linkedinUrl()).ifPresent(profile::setLinkedinUrl);
                 
@@ -431,6 +435,18 @@ public class ProfileController {
         // Profile info
         view.put("id", profile.getId());
         view.put("bio", profile.getBio() != null ? profile.getBio() : "");
+
+        // Parse skills into list for frontend
+        List<String> skillsList = new ArrayList<>();
+        if (profile.getSkills() != null && !profile.getSkills().isEmpty()) {
+            skillsList = Arrays.stream(profile.getSkills().split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+        }
+        view.put("skills", skillsList);
+        view.put("skillsRaw", profile.getSkills());
+
         view.put("githubUrl", profile.getGithubUrl());
         view.put("linkedinUrl", profile.getLinkedinUrl());
         view.put("profileUpdated", profile.getUpdatedAt());
@@ -474,6 +490,7 @@ public class ProfileController {
             user.getEmail(),
             user.getName(),
             profile.getBio() != null ? profile.getBio() : "",
+            profile.getSkills() != null ? profile.getSkills() : "",
             profile.getGithubUrl(),
             profile.getLinkedinUrl(),
             user.getCreatedAt(),

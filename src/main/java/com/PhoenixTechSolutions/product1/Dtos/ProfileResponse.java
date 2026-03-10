@@ -10,6 +10,7 @@ public record ProfileResponse(
     String email,
     String name,
     String bio,
+    String skills,
     String githubUrl,
     String linkedinUrl,
     LocalDateTime createdAt,

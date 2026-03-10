@@ -7,6 +7,7 @@ import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.ProfileRepository;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -37,9 +38,9 @@ public class ProfileController {
         this.userRepository = userRepository;
     }
 
-    /**
-     * VIEW ANY PROFILE - Requires login
-     */
+    
+    @Operation(summary = "View a user's profile by user ID", description = "Returns the profile information for the specified user ID. Requires login to view profiles.")
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getProfileByUserId(
             @PathVariable Long userId,
@@ -80,9 +81,9 @@ public class ProfileController {
         return ResponseEntity.ok(convertToProfileView(profile, viewer));
     }
 
-    /**
-     * VIEW PROFILE BY USERNAME - Requires login
-     */
+    
+    @Operation(summary = "View a user's profile by username", description = "Returns the profile information for the specified username. Requires login to view profiles.")
+
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getProfileByUsername(
             @PathVariable String username,
@@ -131,9 +132,9 @@ public class ProfileController {
         return ResponseEntity.ok(convertToProfileView(profile, viewer));
     }
 
-    /**
-     * LIST ALL PROFILES - Requires login
-     */
+    
+    @Operation(summary = "List all profiles", description = "Returns a list of all user profiles. Requires login to view profiles.")
+
     @GetMapping("/all")
     public ResponseEntity<?> getAllProfiles(Authentication authentication) {
         if (authentication == null) {
@@ -162,9 +163,9 @@ public class ProfileController {
         ));
     }
 
-    /**
-     * GET OWN PROFILE - Full details
-     */
+    
+    @Operation(summary = "Get own profile", description = "Returns the authenticated user's own profile information. Requires login.")
+
     @GetMapping("/me")
     public ResponseEntity<?> getMyProfile(Authentication authentication) {
         if (authentication == null) {
@@ -180,7 +181,7 @@ public class ProfileController {
 
         log.debug("User {} viewing their own profile", currentUser.getEmail());
 
-        // Safe way to get profile
+    
         Profile profile = null;
         try {
             profile = currentUser.getProfile();
@@ -197,9 +198,9 @@ public class ProfileController {
     }
 
    
-    /**
-     * CREATE/UPDATE OWN PROFILE
-     */
+    
+    @Operation(summary = "Create or update own profile", description = "Allows the authenticated user to create a new profile or update their existing profile. Requires login.")
+
     @PostMapping("/me")
     public ResponseEntity<?> createOrUpdateMyProfile(
             @Valid @RequestBody ProfileRequest request,
@@ -265,9 +266,9 @@ public class ProfileController {
         }
     }
 
-    /**
-     * DELETE OWN PROFILE
-     */
+    
+    @Operation(summary = "Delete own profile", description = "Allows the authenticated user to delete their own profile. Requires login.")
+
     @DeleteMapping("/me")
     public ResponseEntity<?> deleteMyProfile(Authentication authentication) {
         if (authentication == null) {
@@ -294,7 +295,6 @@ public class ProfileController {
                     .body(Map.of("error", "Profile not found"));
         }
 
-        // Get profile safely
         Profile profile = null;
         try {
             profile = currentUser.getProfile();
@@ -331,9 +331,9 @@ public class ProfileController {
         ));
     }
 
-    /**
-     * ADMIN ONLY - Get all profiles with full details
-     */
+    
+    @Operation(summary = "Get all profiles for admin", description = "Returns a list of all user profiles with full details. Requires admin privileges.")
+
     @GetMapping("/admin/all")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getAllProfilesForAdmin(Authentication authentication) {
@@ -362,9 +362,9 @@ public class ProfileController {
         ));
     }
 
-    /**
-     * ADMIN ONLY - Delete any profile
-     */
+    
+    @Operation(summary = "Admin delete profile", description = "Allows an admin to delete any user's profile by profile ID. Requires admin privileges.")
+
     @DeleteMapping("/admin/{profileId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> adminDeleteProfile(
@@ -423,9 +423,7 @@ public class ProfileController {
 
     // HELPER METHODS 
 
-    /**
-     * PROFILE VIEW - For viewing other users' profiles
-     */
+    @Operation(summary = "Convert profile to view format", description = "Converts a profile entity to a view DTO format for API responses.")
     private Map<String, Object> convertToProfileView(Profile profile, User viewer) {
         // This method is only called after profile and profile.getUser() are validated
         User profileOwner = profile.getUser();
@@ -476,9 +474,7 @@ public class ProfileController {
         return view;
     }
 
-    /**
-     * FULL VIEW - For owner and admin
-     */
+    @Operation(summary = "Convert profile to full view format", description = "Converts a profile entity to a full view DTO format for API responses.")
     private ProfileResponse convertToFullView(Profile profile) {
         // This method is only called after profile and profile.getUser() are validated
         User user = profile.getUser();

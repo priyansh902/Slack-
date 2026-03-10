@@ -3,6 +3,7 @@ package com.PhoenixTechSolutions.product1.controllers;
 import com.PhoenixTechSolutions.product1.Dtos.PublicPortfolioResponse;
 import com.PhoenixTechSolutions.product1.service.PortfolioService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,9 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    /**
-     * PUBLIC ENDPOINT - Get portfolio by username
-     * No authentication required - this is the shareable link
-     */
+   
+    @Operation(summary = "Get public portfolio by username", description = "Returns the public portfolio for the specified username. No authentication required.")
+
     @GetMapping("/{username}")
     public ResponseEntity<?> getPublicPortfolio(@PathVariable String username) {
         log.info("Public portfolio request for username: {}", username);
@@ -57,9 +57,9 @@ public class PortfolioController {
         }
     }
 
-    /**
-     * Check if a portfolio exists
-     */
+   
+    @Operation(summary = "Check if a portfolio exists for a given username", description = "Returns whether a portfolio exists for the specified username")
+
     @GetMapping("/exists/{username}")
     public ResponseEntity<?> checkPortfolioExists(@PathVariable String username) {
         try {
@@ -77,9 +77,9 @@ public class PortfolioController {
         }
     }
 
-    /**
-     * Health check endpoint
-     */
+    
+    @Operation(summary = "Health check for Portfolio Service", description = "Returns the health status of the Portfolio Service")
+
     @GetMapping("/health")
     public ResponseEntity<?> healthCheck() {
         return ResponseEntity.ok(Map.of(

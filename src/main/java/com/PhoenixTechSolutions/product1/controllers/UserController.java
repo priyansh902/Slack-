@@ -6,6 +6,7 @@ import com.PhoenixTechSolutions.product1.Security.Jwtutil;
 import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,6 +44,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "User login", description = "Authenticates a user and returns a JWT token along with user details.")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -73,6 +75,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register new user", description = "Creates a new user account with the provided details. The first user registered will be granted ADMIN privileges.")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         
         // Check if email already exists
@@ -122,6 +125,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "Get current user details", description = "Returns the details of the authenticated user. Requires authentication.")
     public ResponseEntity<?> me(Authentication authentication) {
         if (authentication == null) {
             log.warn("Unauthorized access to /me endpoint");

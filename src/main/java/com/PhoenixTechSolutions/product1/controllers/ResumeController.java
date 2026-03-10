@@ -6,6 +6,7 @@ import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.ResumeRepositiory;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -46,11 +47,9 @@ public class ResumeController {
         this.userRepository = userRepository;
     }
 
-    //  UPLOAD RESUME 
+    
+    @Operation(summary = "Upload resume", description = "Allows the authenticated user to upload a resume file (PDF only, max 5MB). If a resume already exists, it will be replaced. Requires authentication.")
 
-    /**
-     * Upload resume for the logged-in user
-     */
     @PostMapping("/upload")
     public ResponseEntity<?> uploadResume(
             @RequestParam("file") MultipartFile file,
@@ -164,11 +163,9 @@ public class ResumeController {
         }
     }
 
-    // ========== GET RESUME ==========
 
-    /**
-     * Get logged-in user's resume
-     */
+    @Operation(summary = "Get own resume", description = "Returns the resume details for the authenticated user. Requires authentication.")
+
     @GetMapping("/me")
     public ResponseEntity<?> getMyResume(Authentication authentication) {
 
@@ -190,9 +187,9 @@ public class ResumeController {
         return ResponseEntity.ok(convertToResponse(resumeOpt.get()));
     }
 
-    /**
-     * Get resume by user ID (for viewing other users' resumes)
-     */
+  
+    @Operation(summary = "Get resume by user ID", description = "Returns the resume details for the specified user ID. Requires authentication. Users can view their own resume or others' resumes with limited information. Admins can view all details.")
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getResumeByUserId(
             @PathVariable Long userId,
@@ -230,9 +227,9 @@ public class ResumeController {
         return ResponseEntity.ok(convertToResponse(resume));
     }
 
-    /**
-     * Get resume by username
-     */
+    
+    @Operation(summary = "Get resume by username", description = "Returns the resume details for the specified username. Requires authentication. Users can view their own resume or others' resumes with limited information. Admins can view all details.")
+
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getResumeByUsername(
             @PathVariable String username,
@@ -278,11 +275,9 @@ public class ResumeController {
         return ResponseEntity.ok(convertToResponse(resume));
     }
 
-    // ========== DELETE RESUME ==========
+    
+    @Operation(summary = "Delete own resume", description = "Allows the authenticated user to delete their own resume.")
 
-    /**
-     * Delete own resume
-     */
     @DeleteMapping("/me")
     public ResponseEntity<?> deleteMyResume(Authentication authentication) {
 
@@ -320,11 +315,11 @@ public class ResumeController {
         ));
     }
 
-    // ========== ADMIN ENDPOINTS ==========
+    // ========== ADMIN ENDPOINTS 
 
-    /**
-     * Get all resumes (admin only)
-     */
+    
+    @Operation(summary = "Get all resumes", description = "Returns a list of all resumes in the system with user details. Requires admin privileges.")
+
     @GetMapping("/admin/all")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getAllResumes(Authentication authentication) {
@@ -342,9 +337,9 @@ public class ResumeController {
         ));
     }
 
-    /**
-     * Delete any resume (admin only)
-     */
+   
+    @Operation(summary = "Admin delete resume", description = "Allows an admin to delete any user's resume by resume ID. Requires admin privileges.")
+
     @DeleteMapping("/admin/{resumeId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> adminDeleteResume(
@@ -384,7 +379,7 @@ public class ResumeController {
     }
 
     //  HELPER METHOD 
-
+    @Operation(summary = "Convert resume to response format", description = "Converts a resume entity to a response DTO format for API responses.")
     private ResumeResponse convertToResponse(Resume resume) {
         User user = resume.getUser();
         return new ResumeResponse(

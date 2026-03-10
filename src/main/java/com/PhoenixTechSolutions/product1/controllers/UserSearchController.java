@@ -5,6 +5,7 @@ import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.ProfileRepository;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +31,9 @@ public class UserSearchController {
         this.profileRepository = profileRepository;
     }
 
-    /**
-     * SEARCH USERS BY USERNAME - Partial match, case insensitive
-     */
+
     @GetMapping("/username")
+    @Operation(summary = "Search users by username", description = "Searches for users by their username. Requires authentication.")
     public ResponseEntity<?> searchByUsername(
             @RequestParam String query,
             Authentication authentication) {
@@ -80,10 +80,9 @@ public class UserSearchController {
         }
     }
 
-    /**
-     * SEARCH USERS BY NAME - Partial match, case insensitive
-     */
+   
     @GetMapping("/name")
+    @Operation(summary = "Search users by name", description = "Searches for users by their name. Requires authentication.")
     public ResponseEntity<?> searchByName(
             @RequestParam String query,
             Authentication authentication) {
@@ -129,10 +128,9 @@ public class UserSearchController {
         }
     }
 
-    /**
-     * SEARCH USERS BY KEYWORD - Searches both username and name
-     */
+ 
     @GetMapping("/keyword")
+    @Operation(summary = "Search users by keyword", description = "Searches for users by both username and name. Requires authentication.")
     public ResponseEntity<?> searchByKeyword(
             @RequestParam String keyword,
             Authentication authentication) {
@@ -180,10 +178,9 @@ public class UserSearchController {
         }
     }
 
-    /**
-     * GET USER BY ID - Direct lookup
-     */
+    
     @GetMapping("/user/id/{userId}")
+    @Operation(summary = "Get user by ID", description = "Returns the details of a user based on their ID. Requires authentication.")
     public ResponseEntity<?> getUserById(
             @PathVariable Long userId,
             Authentication authentication) {
@@ -215,10 +212,9 @@ public class UserSearchController {
         }
     }
 
-    /**
-     * GET USER BY EXACT USERNAME - Direct lookup
-     */
+   
     @GetMapping("/user/username/{username}")
+    @Operation(summary = "Get user by exact username", description = "Returns the details of a user based on their exact username. Requires authentication.")
     public ResponseEntity<?> getUserByExactUsername(
             @PathVariable String username,
             Authentication authentication) {
@@ -251,10 +247,9 @@ public class UserSearchController {
         }
     }
 
-    /**
-     * AUTOCOMPLETE SUGGESTIONS - For search bars
-     */
+    
     @GetMapping("/suggestions")
+    @Operation(summary = "Get search suggestions", description = "Returns autocomplete suggestions for user searches. Requires authentication.")
     public ResponseEntity<?> getSearchSuggestions(
             @RequestParam String query,
             Authentication authentication) {
@@ -313,10 +308,9 @@ public class UserSearchController {
         }
     }
 
-    /**
-     * RECENT USERS - Get recently joined users
-     */
+    
     @GetMapping("/recent")
+    @Operation(summary = "Get recent users", description = "Returns a list of recently joined users. Requires authentication.")
     public ResponseEntity<?> getRecentUsers(
             @RequestParam(defaultValue = "10") int limit,
             Authentication authentication) {
@@ -350,11 +344,9 @@ public class UserSearchController {
         }
     }
 
-    /**
-     * GET USER STATS - Get user statistics (admin only)
-     */
     @GetMapping("/stats/{userId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Get user statistics", description = "Returns detailed statistics for a specific user. Requires admin privileges.")
     public ResponseEntity<?> getUserStats(@PathVariable Long userId, Authentication authentication) {
         User admin = (User) authentication.getPrincipal();
         
@@ -387,11 +379,10 @@ public class UserSearchController {
         return ResponseEntity.ok(stats);
     }
 
-    //  UPDATED HELPER METHOD 
+    //  HELPER METHOD 
 
-    /**
-     * Convert user to search result format - USING HELPER METHODS
-     */
+
+    @Operation(summary = "Convert user to search result format", description = "Converts a user object to a search result format.")
     private Map<String, Object> convertToSearchResult(User user, User searcher) {
         Map<String, Object> result = new HashMap<>();
         

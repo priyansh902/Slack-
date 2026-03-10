@@ -7,6 +7,7 @@ import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.ProjectRepository;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,9 +36,9 @@ public class ProjectController {
 
     //  PUBLIC/LOGGED-IN VIEW ENDPOINTS
 
-    /**
-     * Get all projects for a specific user (by user ID)
-     */
+   
+    @Operation(summary = "Get projects by user ID", description = "Returns a list of projects for the specified user ID. Requires login.")
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getProjectsByUserId(
             @PathVariable Long userId,
@@ -71,9 +72,9 @@ public class ProjectController {
         ));
     }
 
-    /**
-     * Get all projects for a specific user (by username)
-     */
+    
+    @Operation(summary = "Get projects by username", description = "Returns a list of projects for the specified username. Requires login.")
+
     @GetMapping("/username/{username}")
     public ResponseEntity<?> getProjectsByUsername(
             @PathVariable String username,
@@ -116,9 +117,9 @@ public class ProjectController {
         ));
     }
 
-    /**
-     * Get a single project by ID
-     */
+   
+    @Operation(summary = "Get project by ID", description = "Returns the project details for the specified project ID. Requires login.")
+
     @GetMapping("/{projectId}")
     public ResponseEntity<?> getProjectById(
             @PathVariable Long projectId,
@@ -154,9 +155,9 @@ public class ProjectController {
         return ResponseEntity.ok(convertToResponse(project));
     }
 
-    /**
-     * Search projects by title
-     */
+    
+    @Operation(summary = "Search projects by title", description = "Returns a list of projects that match the specified title query. Requires login.")
+
     @GetMapping("/search/title")
     public ResponseEntity<?> searchByTitle(
             @RequestParam String query,
@@ -195,9 +196,9 @@ public class ProjectController {
         ));
     }
 
-    /**
-     * Search projects by tech stack
-     */
+    
+    @Operation(summary = "Search projects by tech stack", description = "Returns a list of projects that match the specified technology stack query. Requires login.")
+
     @GetMapping("/search/tech")
     public ResponseEntity<?> searchByTechStack(
             @RequestParam String tech,
@@ -236,9 +237,9 @@ public class ProjectController {
         ));
     }
 
-    /**
-     * Get recent projects
-     */
+ 
+    @Operation(summary = "Get recent projects", description = "Returns a list of the most recently created projects. Requires login.")
+
     @GetMapping("/recent")
     public ResponseEntity<?> getRecentProjects(Authentication authentication) {
 
@@ -268,11 +269,11 @@ public class ProjectController {
         ));
     }
 
-    //  OWNER-ONLY ENDPOINTS (Create/Update/Delete) ==========
+    //  OWNER-ONLY ENDPOINTS 
 
-    /**
-     * Create a new project for the logged-in user
-     */
+    
+    @Operation(summary = "Create a new project", description = "Allows the authenticated user to create a new project. Requires login.")
+    
     @PostMapping
     public ResponseEntity<?> createProject(
             @Valid @RequestBody ProjectRequest request,
@@ -325,9 +326,9 @@ public class ProjectController {
         }
     }
 
-    /**
-     * Update an existing project (only if owner)
-     */
+    
+    @Operation(summary = "Update a project", description = "Allows the authenticated user to update their own project by project ID. Requires login and ownership of the project.")
+
     @PutMapping("/{projectId}")
     public ResponseEntity<?> updateProject(
             @PathVariable Long projectId,
@@ -386,9 +387,10 @@ public class ProjectController {
 
         return ResponseEntity.ok(convertToResponse(updatedProject));
     }
-    /**
-     * Delete a project (only if owner)
-     */
+    
+
+    @Operation(summary = "Delete a project", description = "Allows the authenticated user to delete their own project by project ID. Requires login and ownership of the project.")
+
     @DeleteMapping("/{projectId}")
     public ResponseEntity<?> deleteProject(
             @PathVariable Long projectId,
@@ -431,9 +433,9 @@ public class ProjectController {
         ));
     }
 
-    /**
-     * Get all projects for the logged-in user (their own projects)
-     */
+   
+    @Operation(summary = "Get own projects", description = "Returns a list of projects that belong to the authenticated user. Requires login.")
+
     @GetMapping("/me")
     public ResponseEntity<?> getMyProjects(Authentication authentication) {
 
@@ -464,11 +466,11 @@ public class ProjectController {
         ));
     }
 
-    // ========== ADMIN ENDPOINTS ==========
+    //  ADMIN ENDPOINTS
 
-    /**
-     * Get all projects (admin only)
-     */
+   
+    @Operation(summary = "Get all projects", description = "Returns a list of all projects in the system with user details. Requires admin privileges.")
+
     @GetMapping("/admin/all")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getAllProjects(Authentication authentication) {
@@ -492,9 +494,9 @@ public class ProjectController {
         ));
     }
 
-    /**
-     * Delete any project (admin only)
-     */
+   
+    @Operation(summary = "Admin delete project", description = "Allows an admin to delete any project by project ID. Requires admin privileges.")
+
     @DeleteMapping("/admin/{projectId}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> adminDeleteProject(
@@ -535,11 +537,9 @@ public class ProjectController {
         ));
     }
 
-    // ========== HELPER METHOD ==========
+    // HELPER METHOD 
 
-    /**
-     * Convert Projects entity to ProjectResponse DTO
-     */
+    @Operation(summary = "Convert project to response format", description = "Converts a project entity to a response DTO format for API responses.")
     private ProjectResponse convertToResponse(Projects project) {
         User user = project.getUser();
         return new ProjectResponse(

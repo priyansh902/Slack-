@@ -18,6 +18,7 @@ import com.PhoenixTechSolutions.product1.Dtos.UserDto;
 import com.PhoenixTechSolutions.product1.model.User;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
@@ -32,6 +33,8 @@ public class AdminController {
 
     @PostMapping("/users/{userId}/make-admin")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Promote a user to admin", description = "Allows an existing admin to promote a regular user to admin status. Requires admin privileges.")
+
     public ResponseEntity<?> makeAdmin(@PathVariable Long userId, Authentication authentication) {
         User adminUser = (User) authentication.getPrincipal();
         log.info("Admin {} (ID: {}) attempting to make user ID: {} an admin", 
@@ -60,6 +63,8 @@ public class AdminController {
 
     @DeleteMapping("/users/{userId}/remove-admin")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Remove admin privileges from a user", description = "Allows an existing admin to demote another admin to regular user status. Requires admin privileges. Cannot remove the last remaining admin.")
+
     public ResponseEntity<?> removeAdmin(@PathVariable Long userId, Authentication authentication) {
         User adminUser = (User) authentication.getPrincipal();
         log.info("Admin {} attempting to remove admin privileges from user ID: {}", 
@@ -97,6 +102,8 @@ public class AdminController {
 
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Get all users", description = "Returns a list of all registered users. Requires admin privileges.")
+
     public ResponseEntity<List<UserDto>> getAllUsers(Authentication authentication) {
         User adminUser = (User) authentication.getPrincipal();
         log.debug("Admin {} fetching all users", adminUser.getEmail());
@@ -109,6 +116,7 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
+    @Operation(summary = "Convert user to DTO format", description = "Converts a user entity to a DTO format for API responses.")
     private UserDto convertToDto(User user) {
         return new UserDto(
             user.getId(),

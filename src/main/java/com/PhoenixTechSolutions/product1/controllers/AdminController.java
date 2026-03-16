@@ -81,7 +81,7 @@ public class AdminController {
         if (adminCount <= 1 && "ROLE_ADMIN".equals(user.getRole())) {
             log.warn("Failed attempt - Cannot remove the last admin: {}", user.getEmail());
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Cannot remove the last admin"));
+                    .body(Map.of("error", "Cannot remove the last admin "));
         }
         
         if (!"ROLE_ADMIN".equals(user.getRole())) {

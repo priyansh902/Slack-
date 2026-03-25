@@ -30,12 +30,15 @@ public class Jwtutil {
     }
 
     public String generateToken(String email) {
-        return Jwts.builder()
+        String token =  Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
                 .compact();
+
+                 // Ensure no newlines in the token
+        return token.replaceAll("[\n\r]", "");
     }
 
     public String extractEmail(String token) {

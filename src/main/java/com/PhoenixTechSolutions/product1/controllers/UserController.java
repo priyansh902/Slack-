@@ -42,7 +42,6 @@ public class UserController {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
     @PostMapping("/login")
     @Operation(summary = "User login", description = "Authenticates a user and returns a JWT token along with user details.")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
@@ -59,12 +58,16 @@ public class UserController {
                     .orElseThrow();
 
             String token = jwtutil.generateToken(user.getEmail());
+            
+            // Clean the name - remove newlines
+            String cleanName = user.getName() != null ? 
+                user.getName().replaceAll("[\n\r]", " ").trim() : "";
 
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("username", user.getUsername());
             response.put("email", user.getEmail());
-            response.put("name", user.getName());
+            response.put("name", cleanName);  // ← Use cleanName here, NOT user.getName()
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -134,10 +137,15 @@ public class UserController {
         
         User user = (User) authentication.getPrincipal();
         log.debug("User details accessed: {}", user.getEmail());
+
+        
+        // Clean the name
+        String cleanName = user.getName() != null ? 
+        user.getName().replaceAll("[\n\r]", " ").trim() : "";
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", user.getId());
-        response.put("name", user.getName());
+        response.put("name", cleanName);
         response.put("username", user.getUsername());
         response.put("email", user.getEmail());
         response.put("role", user.getAuthorities());

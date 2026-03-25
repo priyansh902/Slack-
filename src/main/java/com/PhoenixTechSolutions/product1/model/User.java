@@ -39,6 +39,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
+    public void setName(String name) {
+        // Remove any newlines and extra spaces
+        this.name = name != null ? name.replaceAll("[\n\r]", " ").trim() : null;
+    }
+
     @Column(nullable = false, unique = true)
     private String email;
 

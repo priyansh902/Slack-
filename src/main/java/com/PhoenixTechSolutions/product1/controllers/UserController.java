@@ -63,11 +63,22 @@ public class UserController {
             String cleanName = user.getName() != null ? 
                 user.getName().replaceAll("[\n\r]", " ").trim() : "";
 
+                   // Also clean username and email just to be safe
+            String cleanUsername = user.getUsername() != null ? 
+                user.getUsername().replaceAll("[\n\r]", "").trim() : "";
+            String cleanEmail = user.getEmail() != null ? 
+                user.getEmail().replaceAll("[\n\r]", "").trim() : "";
+
             Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("username", user.getUsername());
-            response.put("email", user.getEmail());
-            response.put("name", cleanName);  // ← Use cleanName here, NOT user.getName()
+                response.put("token", token);
+                response.put("username", cleanUsername);  // Use cleaned username
+                response.put("email", cleanEmail);        // Use cleaned email
+                response.put("name", cleanName);          // Use cleaned name
+
+                // Debug print to verify no newlines
+                System.out.println("Response JSON: " + response.toString());
+                System.out.println("Name contains newline: " + cleanName.contains("\n"));
+                
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -138,18 +149,21 @@ public class UserController {
         User user = (User) authentication.getPrincipal();
         log.debug("User details accessed: {}", user.getEmail());
 
-        
-        // Clean the name
-        String cleanName = user.getName() != null ? 
-        user.getName().replaceAll("[\n\r]", " ").trim() : "";
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", user.getId());
-        response.put("name", cleanName);
-        response.put("username", user.getUsername());
-        response.put("email", user.getEmail());
-        response.put("role", user.getAuthorities());
-        response.put("createdAt", user.getCreatedAt());
+            // Clean all string fields
+            String cleanName = user.getName() != null ? 
+                user.getName().replaceAll("[\n\r]", " ").trim() : "";
+            String cleanUsername = user.getUsername() != null ? 
+                user.getUsername().replaceAll("[\n\r]", "").trim() : "";
+            String cleanEmail = user.getEmail() != null ? 
+                user.getEmail().replaceAll("[\n\r]", "").trim() : "";
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", user.getId());
+            response.put("name", cleanName);
+            response.put("username", cleanUsername);
+            response.put("email", cleanEmail);
+            response.put("role", user.getAuthorities().toString());
+            response.put("createdAt", user.getCreatedAt());
         
         return ResponseEntity.ok(response);
     }

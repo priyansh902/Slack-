@@ -36,9 +36,14 @@ public class Jwtutil {
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
                 .compact();
-
-                 // Ensure no newlines in the token
-        return token.replaceAll("[\n\r]", "");
+            // Remove any newlines from token
+            String cleanToken = token.replaceAll("[\n\r]", "");
+            
+            // Debug
+            System.out.println("Token has newline: " + cleanToken.contains("\n"));
+            System.out.println("Token length: " + cleanToken.length());
+            
+            return cleanToken;
     }
 
     public String extractEmail(String token) {

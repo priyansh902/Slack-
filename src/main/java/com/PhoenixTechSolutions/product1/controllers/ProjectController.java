@@ -545,7 +545,7 @@ public class ProjectController {
         return new ProjectResponse(
             project.getId(),
             user.getId(),
-            user.getUsername(),
+            user.getRealUsername(),
             project.getTitle(),
             project.getDescription(),
             project.getTechStack(),

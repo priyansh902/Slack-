@@ -31,7 +31,7 @@ public interface UserRepositiory extends JpaRepository<User, Long> {
     List<User> findByUsernameContainingIgnoreCaseOrNameContainingIgnoreCase(String username, String name);
     
     // Get recent users
-    @Query("SELECT u FROM User u ORDER BY u.createdAt DESC")
+    @Query(value = "SELECT * FROM user ORDER BY created_at DESC LIMIT :limit", nativeQuery = true)
     List<User> findTopUsersByOrderByCreatedAtDesc(@Param("limit") int limit);
     
     // Custom search with native query

@@ -451,7 +451,7 @@ public class ProfileController {
         
         // User info
         view.put("userId", profileOwner.getId());
-        view.put("username", profileOwner.getUsername());
+        view.put("username", profileOwner.getRealUsername());
         view.put("name", profileOwner.getName());
         view.put("memberSince", profileOwner.getCreatedAt());
         
@@ -482,7 +482,7 @@ public class ProfileController {
         return new ProfileResponse(
             profile.getId(),
             user.getId(),
-            user.getUsername(),
+            user.getRealUsername(),
             user.getEmail(),
             user.getName(),
             profile.getBio() != null ? profile.getBio() : "",

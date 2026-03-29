@@ -57,7 +57,7 @@ public class AdminController {
         return ResponseEntity.ok(Map.of(
             "message", "User is now an admin",
             "email", user.getEmail(),
-            "username", user.getUsername()
+            "username", user.getRealUsername()
         ));
     }
 
@@ -122,7 +122,7 @@ public class AdminController {
             user.getId(),
             user.getName(),
             user.getEmail(),
-            user.getUsername(),
+            user.getRealUsername(),
             user.getRole(),
             user.getCreatedAt()
         );

@@ -85,7 +85,7 @@ public class PortfolioService {
         log.info("Portfolio generated for user: {} with {} projects", username, projectDtos.size());
 
         return new PublicPortfolioResponse(
-                user.getUsername(),
+                user.getRealUsername(),
                 user.getName(),
                 user.getEmail(), 
                 bio,

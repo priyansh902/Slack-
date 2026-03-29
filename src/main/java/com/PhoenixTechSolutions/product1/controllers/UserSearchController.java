@@ -279,7 +279,7 @@ public class UserSearchController {
                     .map(user -> {
                         Map<String, Object> suggestion = new HashMap<>();
                         suggestion.put("userId", user.getId());
-                        suggestion.put("username", user.getUsername());
+                        suggestion.put("username", user.getRealUsername());
                         suggestion.put("name", user.getName());
                         suggestion.put("hasProfile", user.hasProfile());  // Using helper!
                         suggestion.put("profileId", user.getProfile() != null ? user.getProfile().getId() : null);
@@ -360,7 +360,7 @@ public class UserSearchController {
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("userId", targetUser.getId());
-        stats.put("username", targetUser.getUsername());
+        stats.put("username", targetUser.getRealUsername());
         stats.put("name", targetUser.getName());
         stats.put("email", targetUser.getEmail());
         stats.put("role", targetUser.getRole());
@@ -388,7 +388,7 @@ public class UserSearchController {
         
         // Basic user info
         result.put("userId", user.getId());
-        result.put("username", user.getUsername());
+        result.put("username", user.getRealUsername());
         result.put("name", user.getName());
         result.put("memberSince", user.getCreatedAt());
         

@@ -252,6 +252,14 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority(role));
     }
 
+
+    /** Returns the actual stored username field (not email).
+     * Use this instead of getUsername() in all controllers and DTOs.
+     */
+    public String getRealUsername() {
+        return username;
+    }
+
     @Override
     public String getUsername() {
         return email;

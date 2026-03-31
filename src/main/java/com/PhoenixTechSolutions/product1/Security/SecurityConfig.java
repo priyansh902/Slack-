@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/users/login",
                                 "/api/users/register",
+                                "/api/auth/google",  // Google Sign-In (public)
                                 "/api/portfolio/**",
                                 "/api/portfolio/{username}/**",
                                 "/api/portfolio/exists/{username}**",

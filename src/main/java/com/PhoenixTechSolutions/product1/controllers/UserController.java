@@ -64,8 +64,8 @@ public class UserController {
                 user.getName().replaceAll("[\n\r]", " ").trim() : "";
 
                    // Also clean username and email just to be safe
-            String cleanUsername = user.getUsername() != null ? 
-                user.getUsername().replaceAll("[\n\r]", "").trim() : "";
+            String cleanUsername = user.getRealUsername() != null ? 
+                user.getRealUsername().replaceAll("[\n\r]", "").trim() : "";
             String cleanEmail = user.getEmail() != null ? 
                 user.getEmail().replaceAll("[\n\r]", "").trim() : "";
 
@@ -76,8 +76,7 @@ public class UserController {
                 response.put("name", cleanName);          // Use cleaned name
 
                 // Debug print to verify no newlines
-                System.out.println("Response JSON: " + response.toString());
-                System.out.println("Name contains newline: " + cleanName.contains("\n"));
+
                 
 
             return ResponseEntity.ok(response);
@@ -126,7 +125,7 @@ public class UserController {
         Map<String, String> success = new HashMap<>();
             success.put("message", "User registered successfully");
             success.put("email", user.getEmail());
-            success.put("username", user.getUsername());
+            success.put("username", user.getRealUsername());
             success.put("role", user.getRole());
     
             if (isFirstUser) {
@@ -152,8 +151,8 @@ public class UserController {
             // Clean all string fields
             String cleanName = user.getName() != null ? 
                 user.getName().replaceAll("[\n\r]", " ").trim() : "";
-            String cleanUsername = user.getUsername() != null ? 
-                user.getUsername().replaceAll("[\n\r]", "").trim() : "";
+            String cleanUsername = user.getRealUsername() != null ? 
+                user.getRealUsername().replaceAll("[\n\r]", "").trim() : "";
             String cleanEmail = user.getEmail() != null ? 
                 user.getEmail().replaceAll("[\n\r]", "").trim() : "";
             
@@ -162,7 +161,7 @@ public class UserController {
             response.put("name", cleanName);
             response.put("username", cleanUsername);
             response.put("email", cleanEmail);
-            response.put("role", user.getAuthorities().toString());
+            response.put("role", user.getRole());  // Clean role string e.g. "ROLE_ADMIN"
             response.put("createdAt", user.getCreatedAt());
         
         return ResponseEntity.ok(response);

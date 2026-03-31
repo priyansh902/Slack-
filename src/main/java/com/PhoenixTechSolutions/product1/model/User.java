@@ -56,6 +56,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String role = "ROLE_USER";
 
+    /** "LOCAL" for email/password users, "GOOGLE" for OAuth users. */
+    @Column(name = "provider", length = 20)
+    private String provider = "LOCAL";
+
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -250,6 +255,14 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role));
+    }
+
+
+    /** Returns the actual stored username field (not email).
+     * Use this instead of getUsername() in all controllers and DTOs.
+     */
+    public String getRealUsername() {
+        return username;
     }
 
     @Override

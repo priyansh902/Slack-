@@ -385,7 +385,7 @@ public class ResumeController {
         return new ResumeResponse(
             resume.getId(),
             user.getId(),
-            user.getUsername(),
+            user.getRealUsername(),
             resume.getFileName(),
             resume.getFileUrl(),
             resume.getFileSize(),

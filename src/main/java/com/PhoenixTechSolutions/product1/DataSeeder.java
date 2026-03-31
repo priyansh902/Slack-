@@ -3,7 +3,6 @@ package com.PhoenixTechSolutions.product1;
 import com.PhoenixTechSolutions.product1.model.Profile;
 import com.PhoenixTechSolutions.product1.model.Projects;
 import com.PhoenixTechSolutions.product1.model.User;
-import com.PhoenixTechSolutions.product1.repositiory.ProfileRepository;
 import com.PhoenixTechSolutions.product1.repositiory.ProjectRepository;
 import com.PhoenixTechSolutions.product1.repositiory.UserRepositiory;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -21,7 +19,6 @@ import java.util.List;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepositiory userRepository;
-    private final ProfileRepository profileRepository;
     private final ProjectRepository projectRepository;
     private final PasswordEncoder passwordEncoder;
 

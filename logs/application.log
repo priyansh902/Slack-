@@ -84,3 +84,124 @@
 2026-03-28 18:12:45 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 2026-03-28 18:12:45 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 42 ms
 2026-03-28 18:13:13 [http-nio-8080-exec-6] DEBUG c.P.p.controllers.UserController - User details accessed: pk953666@gmail.com
+<<<<<<< HEAD
+=======
+2026-03-29 19:47:28 [main] INFO  c.P.product1.SlackApplication - Starting SlackApplication using Java 21.0.10 with PID 18724 (D:\backend_fixed\product1\target\classes started by hp in D:\backend_fixed\product1)
+2026-03-29 19:47:28 [main] DEBUG c.P.product1.SlackApplication - Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-29 19:47:28 [main] INFO  c.P.product1.SlackApplication - The following 1 profile is active: "dev"
+2026-03-29 19:47:30 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-29 19:47:30 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 115 ms. Found 4 JPA repository interfaces.
+2026-03-29 19:47:31 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-03-29 19:47:31 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-29 19:47:31 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-29 19:47:31 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 2856 ms
+2026-03-29 19:47:32 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-29 19:47:32 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-03-29 19:47:33 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@78b8f818
+2026-03-29 19:47:33 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-03-29 19:47:33 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-29 19:47:34 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-29 19:47:34 [main] INFO  o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-29 19:47:35 [main] DEBUG c.P.product1.Security.JwtAuthFilter - Filter 'jwtAuthFilter' configured for use
+2026-03-29 19:47:36 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userdetailsService
+2026-03-29 19:47:37 [main] WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-29 19:47:38 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-03-29 19:47:38 [main] INFO  c.P.product1.SlackApplication - Started SlackApplication in 10.392 seconds (process running for 10.956)
+2026-03-29 19:47:38 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-03-29 19:47:38 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-03-29 19:54:42 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-29 19:54:42 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-03-29 19:54:42 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 227 ms
+2026-03-29 19:54:47 [http-nio-8080-exec-4] DEBUG c.P.p.controllers.UserController - User details accessed: pk953666@gmail.com
+2026-03-29 19:54:48 [http-nio-8080-exec-2] DEBUG c.P.p.controllers.ProfileController - User pk953666@gmail.com viewing their own profile
+2026-03-29 19:54:48 [http-nio-8080-exec-1] DEBUG c.P.p.controllers.ProjectController - User pk953666@gmail.com fetching their own projects
+2026-03-29 19:54:48 [http-nio-8080-exec-3] DEBUG c.P.p.c.UserSearchController - User pk953666@gmail.com requesting recent users (limit: 10)
+2026-03-29 19:54:48 [http-nio-8080-exec-10] DEBUG c.P.p.controllers.ProjectController - User pk953666@gmail.com viewed recent projects
+2026-03-29 19:54:48 [http-nio-8080-exec-4] DEBUG c.P.p.controllers.ProjectController - User pk953666@gmail.com fetching their own projects
+2026-03-29 19:55:02 [http-nio-8080-exec-6] INFO  c.P.p.c.UserSearchController - User pk953666@gmail.com searching users with keyword: 'jo'
+2026-03-29 19:55:03 [http-nio-8080-exec-6] INFO  c.P.p.c.UserSearchController - Keyword search 'jo' returned 1 results in 140ms for user pk953666@gmail.com
+2026-03-29 19:55:08 [http-nio-8080-exec-10] DEBUG c.P.p.controllers.ProfileController - User pk953666@gmail.com viewing profile for user ID: 4
+2026-03-29 19:55:08 [http-nio-8080-exec-9] DEBUG c.P.p.controllers.ProjectController - User pk953666@gmail.com viewing projects for user ID: 4
+2026-03-29 19:55:14 [http-nio-8080-exec-3] DEBUG c.P.p.controllers.ProfileController - User pk953666@gmail.com viewing profile for user ID: 1
+2026-03-29 19:55:14 [http-nio-8080-exec-4] DEBUG c.P.p.controllers.ProjectController - User pk953666@gmail.com viewing projects for user ID: 1
+2026-03-29 19:55:39 [http-nio-8080-exec-6] DEBUG c.P.p.controllers.ResumeController - User pk953666@gmail.com fetching their resume
+2026-03-29 19:55:46 [http-nio-8080-exec-8] INFO  c.P.p.controllers.ResumeController - User pk953666@gmail.com uploading resume
+2026-03-29 19:55:46 [http-nio-8080-exec-8] INFO  c.P.p.controllers.ResumeController - Creating new resume for user: pk953666@gmail.com
+2026-03-29 19:55:46 [http-nio-8080-exec-8] INFO  c.P.p.controllers.ResumeController - Resume uploaded successfully for user: pk953666@gmail.com
+2026-03-29 19:55:47 [http-nio-8080-exec-10] DEBUG c.P.p.controllers.ResumeController - User pk953666@gmail.com fetching their resume
+2026-03-29 19:56:30 [http-nio-8080-exec-8] INFO  c.P.p.c.PortfolioController - Public portfolio request for username: priyansh123
+2026-03-29 19:56:30 [http-nio-8080-exec-8] INFO  c.P.p.service.PortfolioService - Generating public portfolio for username: priyansh123
+2026-03-29 19:56:31 [http-nio-8080-exec-8] INFO  c.P.p.service.PortfolioService - Portfolio generated for user: priyansh123 with 1 projects
+2026-03-29 19:56:40 [http-nio-8080-exec-1] INFO  c.P.p.controllers.ProjectController - Admin pk953666@gmail.com fetching all projects
+2026-03-29 19:56:40 [http-nio-8080-exec-3] DEBUG c.P.p.controllers.AdminController - Admin pk953666@gmail.com fetching all users
+2026-03-29 19:56:41 [http-nio-8080-exec-3] DEBUG c.P.p.controllers.AdminController - Retrieved 5 users
+2026-03-29 19:56:55 [http-nio-8080-exec-7] DEBUG c.P.p.controllers.ProfileController - User pk953666@gmail.com viewing profile for user ID: 2
+2026-03-29 19:56:55 [http-nio-8080-exec-8] DEBUG c.P.p.controllers.ProjectController - User pk953666@gmail.com viewing projects for user ID: 2
+2026-03-29 19:57:44 [http-nio-8080-exec-10] DEBUG c.P.p.controllers.ProjectController - User pk953666@gmail.com viewing project ID: 1
+2026-03-29 19:59:10 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-29 19:59:10 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-03-29 19:59:11 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-29 19:59:11 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-03-29 19:59:11 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-03-29 20:52:07 [main] INFO  c.P.product1.SlackApplication - Starting SlackApplication using Java 21.0.10 with PID 1780 (D:\product1\target\classes started by hp in D:\product1)
+2026-03-29 20:52:07 [main] DEBUG c.P.product1.SlackApplication - Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-29 20:52:07 [main] INFO  c.P.product1.SlackApplication - The following 1 profile is active: "dev"
+2026-03-29 20:52:09 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-29 20:52:09 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 93 ms. Found 4 JPA repository interfaces.
+2026-03-29 20:52:10 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-03-29 20:52:10 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-29 20:52:10 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-29 20:52:10 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 2718 ms
+2026-03-29 20:52:12 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-29 20:52:12 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-03-29 20:52:13 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7d82ca56
+2026-03-29 20:52:13 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-03-29 20:52:13 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-29 20:52:16 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-29 20:52:16 [main] INFO  o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-29 20:52:17 [main] DEBUG c.P.product1.Security.JwtAuthFilter - Filter 'jwtAuthFilter' configured for use
+2026-03-29 20:52:20 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userdetailsService
+2026-03-29 20:52:20 [main] WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-29 20:52:22 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-03-29 20:52:22 [main] INFO  c.P.product1.SlackApplication - Started SlackApplication in 15.952 seconds (process running for 16.805)
+2026-03-29 20:52:22 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-03-29 20:52:22 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-03-29 20:52:31 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-03-29 20:52:31 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-03-29 20:52:31 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 16 ms
+2026-03-29 20:52:32 [http-nio-8080-exec-7] INFO  o.s.api.AbstractOpenApiResource - Init duration for springdoc-openapi is: 869 ms
+2026-03-29 20:52:50 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-29 20:52:50 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-03-29 20:52:50 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-29 20:52:50 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-03-29 20:52:50 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+>>>>>>> 060aee470b4a7e0216bbe6537b1929bb5acf2183
+2026-03-31 20:34:46 [main] INFO  c.P.product1.SlackApplication - Starting SlackApplication using Java 21.0.10 with PID 4716 (D:\product1\target\classes started by hp in D:\product1)
+2026-03-31 20:34:46 [main] DEBUG c.P.product1.SlackApplication - Running with Spring Boot v4.0.3, Spring v7.0.5
+2026-03-31 20:34:46 [main] INFO  c.P.product1.SlackApplication - The following 1 profile is active: "dev"
+2026-03-31 20:34:48 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-31 20:34:48 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 89 ms. Found 4 JPA repository interfaces.
+2026-03-31 20:34:49 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-03-31 20:34:49 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-03-31 20:34:49 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.18]
+2026-03-31 20:34:49 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 2300 ms
+2026-03-31 20:34:50 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-31 20:34:50 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-03-31 20:34:50 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2337bf27
+2026-03-31 20:34:50 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-03-31 20:34:50 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-31 20:34:53 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31 20:34:53 [main] INFO  o.s.d.j.r.q.QueryEnhancerFactories - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-31 20:34:54 [main] DEBUG c.P.product1.Security.JwtAuthFilter - Filter 'jwtAuthFilter' configured for use
+2026-03-31 20:34:56 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name userdetailsService
+2026-03-31 20:34:56 [main] WARN  o.s.b.j.a.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-31 20:34:58 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
+2026-03-31 20:34:58 [main] INFO  c.P.product1.SlackApplication - Started SlackApplication in 13.109 seconds (process running for 14.121)
+2026-03-31 20:34:59 [main] INFO  c.P.product1.DataSeeder - Database already has data — skipping seed.
+2026-03-31 20:34:59 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+2026-03-31 20:34:59 [main] WARN  o.s.c.events.SpringDocAppInitializer - SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+2026-03-31 20:35:03 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-03-31 20:35:03 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-03-31 20:35:03 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-31 20:35:03 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-03-31 20:35:03 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

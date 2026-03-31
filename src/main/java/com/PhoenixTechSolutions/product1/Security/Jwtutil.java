@@ -40,7 +40,8 @@ public class Jwtutil {
             String cleanToken = token.replaceAll("[\n\r]", "");
             
             // Debug
-
+            System.out.println("Token has newline: " + cleanToken.contains("\n"));
+            System.out.println("Token length: " + cleanToken.length());
             
             return cleanToken;
     }
